@@ -1,0 +1,468 @@
+Terminale, die in Grammatik unbenutzt sind
+
+    PARAMETER
+
+
+Grammatik
+
+    0 $accept: file $end
+
+    1 file: DFISE FILE_FORMAT blocks
+
+    2 blocks: block
+    3       | blocks block
+
+    4 block: KEYWORD '{' body '}'
+    5      | KEYWORD '(' INTEGER ')' '{' body '}'
+    6      | KEYWORD '(' STRING ')' '{' body '}'
+
+    7 body: bodyitem
+    8     | body bodyitem
+
+    9 bodyitem: block
+   10         | data
+   11         | KEYWORD '=' data
+   12         | KEYWORD '=' KEYWORD
+
+   13 data: value
+   14     | '[' values ']'
+
+   15 values: value
+   16       | values value
+
+   17 value: INTEGER
+   18      | FLOAT
+   19      | STRING
+
+
+Terminale und die Regeln, in denen sie verwendet werden
+
+    $end (0) 0
+    '(' (40) 5 6
+    ')' (41) 5 6
+    '=' (61) 11 12
+    '[' (91) 14
+    ']' (93) 14
+    '{' (123) 4 5 6
+    '}' (125) 4 5 6
+    error (256)
+    DFISE <sval> (258) 1
+    FILE_FORMAT <sval> (259) 1
+    INTEGER <ival> (260) 5 17
+    FLOAT <dval> (261) 18
+    STRING <sval> (262) 6 19
+    KEYWORD <sval> (263) 4 5 6 11 12
+    PARAMETER <sval> (264)
+
+
+Nicht-Terminal und die Regeln, in denen sie verwendet werden
+
+    $accept (17)
+        auf der linken Seite: 0
+    file (18)
+        auf der linken Seite: 1
+        auf der rechten Seite: 0
+    blocks (19)
+        auf der linken Seite: 2 3
+        auf der rechten Seite: 1 3
+    block <bval> (20)
+        auf der linken Seite: 4 5 6
+        auf der rechten Seite: 2 3 9
+    body <bval> (21)
+        auf der linken Seite: 7 8
+        auf der rechten Seite: 4 5 6 8
+    bodyitem <bval> (22)
+        auf der linken Seite: 9 10 11 12
+        auf der rechten Seite: 7 8
+    data <tokens> (23)
+        auf der linken Seite: 13 14
+        auf der rechten Seite: 10 11
+    values <tokens> (24)
+        auf der linken Seite: 15 16
+        auf der rechten Seite: 14 16
+    value <token> (25)
+        auf der linken Seite: 17 18 19
+        auf der rechten Seite: 13 15 16
+
+
+Zustand 0
+
+    0 $accept: . file $end
+
+    DFISE  schiebe und gehe zu Zustand 1 über
+
+    file  gehe zu Zustand 2 über
+
+
+Zustand 1
+
+    1 file: DFISE . FILE_FORMAT blocks
+
+    FILE_FORMAT  schiebe und gehe zu Zustand 3 über
+
+
+Zustand 2
+
+    0 $accept: file . $end
+
+    $end  schiebe und gehe zu Zustand 4 über
+
+
+Zustand 3
+
+    1 file: DFISE FILE_FORMAT . blocks
+
+    KEYWORD  schiebe und gehe zu Zustand 5 über
+
+    blocks  gehe zu Zustand 6 über
+    block   gehe zu Zustand 7 über
+
+
+Zustand 4
+
+    0 $accept: file $end .
+
+    $default  annehmen
+
+
+Zustand 5
+
+    4 block: KEYWORD . '{' body '}'
+    5      | KEYWORD . '(' INTEGER ')' '{' body '}'
+    6      | KEYWORD . '(' STRING ')' '{' body '}'
+
+    '{'  schiebe und gehe zu Zustand 8 über
+    '('  schiebe und gehe zu Zustand 9 über
+
+
+Zustand 6
+
+    1 file: DFISE FILE_FORMAT blocks .
+    3 blocks: blocks . block
+
+    KEYWORD  schiebe und gehe zu Zustand 5 über
+
+    $default  reduziere mit Regel 1 (file)
+
+    block  gehe zu Zustand 10 über
+
+
+Zustand 7
+
+    2 blocks: block .
+
+    $default  reduziere mit Regel 2 (blocks)
+
+
+Zustand 8
+
+    4 block: KEYWORD '{' . body '}'
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    KEYWORD  schiebe und gehe zu Zustand 14 über
+    '['      schiebe und gehe zu Zustand 15 über
+
+    block     gehe zu Zustand 16 über
+    body      gehe zu Zustand 17 über
+    bodyitem  gehe zu Zustand 18 über
+    data      gehe zu Zustand 19 über
+    value     gehe zu Zustand 20 über
+
+
+Zustand 9
+
+    5 block: KEYWORD '(' . INTEGER ')' '{' body '}'
+    6      | KEYWORD '(' . STRING ')' '{' body '}'
+
+    INTEGER  schiebe und gehe zu Zustand 21 über
+    STRING   schiebe und gehe zu Zustand 22 über
+
+
+Zustand 10
+
+    3 blocks: blocks block .
+
+    $default  reduziere mit Regel 3 (blocks)
+
+
+Zustand 11
+
+   17 value: INTEGER .
+
+    $default  reduziere mit Regel 17 (value)
+
+
+Zustand 12
+
+   18 value: FLOAT .
+
+    $default  reduziere mit Regel 18 (value)
+
+
+Zustand 13
+
+   19 value: STRING .
+
+    $default  reduziere mit Regel 19 (value)
+
+
+Zustand 14
+
+    4 block: KEYWORD . '{' body '}'
+    5      | KEYWORD . '(' INTEGER ')' '{' body '}'
+    6      | KEYWORD . '(' STRING ')' '{' body '}'
+   11 bodyitem: KEYWORD . '=' data
+   12         | KEYWORD . '=' KEYWORD
+
+    '{'  schiebe und gehe zu Zustand 8 über
+    '('  schiebe und gehe zu Zustand 9 über
+    '='  schiebe und gehe zu Zustand 23 über
+
+
+Zustand 15
+
+   14 data: '[' . values ']'
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+
+    values  gehe zu Zustand 24 über
+    value   gehe zu Zustand 25 über
+
+
+Zustand 16
+
+    9 bodyitem: block .
+
+    $default  reduziere mit Regel 9 (bodyitem)
+
+
+Zustand 17
+
+    4 block: KEYWORD '{' body . '}'
+    8 body: body . bodyitem
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    KEYWORD  schiebe und gehe zu Zustand 14 über
+    '}'      schiebe und gehe zu Zustand 26 über
+    '['      schiebe und gehe zu Zustand 15 über
+
+    block     gehe zu Zustand 16 über
+    bodyitem  gehe zu Zustand 27 über
+    data      gehe zu Zustand 19 über
+    value     gehe zu Zustand 20 über
+
+
+Zustand 18
+
+    7 body: bodyitem .
+
+    $default  reduziere mit Regel 7 (body)
+
+
+Zustand 19
+
+   10 bodyitem: data .
+
+    $default  reduziere mit Regel 10 (bodyitem)
+
+
+Zustand 20
+
+   13 data: value .
+
+    $default  reduziere mit Regel 13 (data)
+
+
+Zustand 21
+
+    5 block: KEYWORD '(' INTEGER . ')' '{' body '}'
+
+    ')'  schiebe und gehe zu Zustand 28 über
+
+
+Zustand 22
+
+    6 block: KEYWORD '(' STRING . ')' '{' body '}'
+
+    ')'  schiebe und gehe zu Zustand 29 über
+
+
+Zustand 23
+
+   11 bodyitem: KEYWORD '=' . data
+   12         | KEYWORD '=' . KEYWORD
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    KEYWORD  schiebe und gehe zu Zustand 30 über
+    '['      schiebe und gehe zu Zustand 15 über
+
+    data   gehe zu Zustand 31 über
+    value  gehe zu Zustand 20 über
+
+
+Zustand 24
+
+   14 data: '[' values . ']'
+   16 values: values . value
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    ']'      schiebe und gehe zu Zustand 32 über
+
+    value  gehe zu Zustand 33 über
+
+
+Zustand 25
+
+   15 values: value .
+
+    $default  reduziere mit Regel 15 (values)
+
+
+Zustand 26
+
+    4 block: KEYWORD '{' body '}' .
+
+    $default  reduziere mit Regel 4 (block)
+
+
+Zustand 27
+
+    8 body: body bodyitem .
+
+    $default  reduziere mit Regel 8 (body)
+
+
+Zustand 28
+
+    5 block: KEYWORD '(' INTEGER ')' . '{' body '}'
+
+    '{'  schiebe und gehe zu Zustand 34 über
+
+
+Zustand 29
+
+    6 block: KEYWORD '(' STRING ')' . '{' body '}'
+
+    '{'  schiebe und gehe zu Zustand 35 über
+
+
+Zustand 30
+
+   12 bodyitem: KEYWORD '=' KEYWORD .
+
+    $default  reduziere mit Regel 12 (bodyitem)
+
+
+Zustand 31
+
+   11 bodyitem: KEYWORD '=' data .
+
+    $default  reduziere mit Regel 11 (bodyitem)
+
+
+Zustand 32
+
+   14 data: '[' values ']' .
+
+    $default  reduziere mit Regel 14 (data)
+
+
+Zustand 33
+
+   16 values: values value .
+
+    $default  reduziere mit Regel 16 (values)
+
+
+Zustand 34
+
+    5 block: KEYWORD '(' INTEGER ')' '{' . body '}'
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    KEYWORD  schiebe und gehe zu Zustand 14 über
+    '['      schiebe und gehe zu Zustand 15 über
+
+    block     gehe zu Zustand 16 über
+    body      gehe zu Zustand 36 über
+    bodyitem  gehe zu Zustand 18 über
+    data      gehe zu Zustand 19 über
+    value     gehe zu Zustand 20 über
+
+
+Zustand 35
+
+    6 block: KEYWORD '(' STRING ')' '{' . body '}'
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    KEYWORD  schiebe und gehe zu Zustand 14 über
+    '['      schiebe und gehe zu Zustand 15 über
+
+    block     gehe zu Zustand 16 über
+    body      gehe zu Zustand 37 über
+    bodyitem  gehe zu Zustand 18 über
+    data      gehe zu Zustand 19 über
+    value     gehe zu Zustand 20 über
+
+
+Zustand 36
+
+    5 block: KEYWORD '(' INTEGER ')' '{' body . '}'
+    8 body: body . bodyitem
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    KEYWORD  schiebe und gehe zu Zustand 14 über
+    '}'      schiebe und gehe zu Zustand 38 über
+    '['      schiebe und gehe zu Zustand 15 über
+
+    block     gehe zu Zustand 16 über
+    bodyitem  gehe zu Zustand 27 über
+    data      gehe zu Zustand 19 über
+    value     gehe zu Zustand 20 über
+
+
+Zustand 37
+
+    6 block: KEYWORD '(' STRING ')' '{' body . '}'
+    8 body: body . bodyitem
+
+    INTEGER  schiebe und gehe zu Zustand 11 über
+    FLOAT    schiebe und gehe zu Zustand 12 über
+    STRING   schiebe und gehe zu Zustand 13 über
+    KEYWORD  schiebe und gehe zu Zustand 14 über
+    '}'      schiebe und gehe zu Zustand 39 über
+    '['      schiebe und gehe zu Zustand 15 über
+
+    block     gehe zu Zustand 16 über
+    bodyitem  gehe zu Zustand 27 über
+    data      gehe zu Zustand 19 über
+    value     gehe zu Zustand 20 über
+
+
+Zustand 38
+
+    5 block: KEYWORD '(' INTEGER ')' '{' body '}' .
+
+    $default  reduziere mit Regel 5 (block)
+
+
+Zustand 39
+
+    6 block: KEYWORD '(' STRING ')' '{' body '}' .
+
+    $default  reduziere mit Regel 6 (block)

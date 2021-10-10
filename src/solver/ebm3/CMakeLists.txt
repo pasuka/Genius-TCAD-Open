@@ -1,0 +1,35 @@
+
+SET (CXX_SRCS
+ebm3_boundary_ei_interface.cc
+ebm3_boundary_ev.cc
+ebm3_boundary_float_metal.cc
+ebm3_boundary_gate.cc
+ebm3_boundary_hetero_interface.cc
+ebm3_boundary_homo_interface.cc
+ebm3_boundary_ii_interface.cc
+ebm3_boundary_ir_interface.cc
+ebm3_boundary_is_interface.cc
+ebm3_boundary_iv.cc
+ebm3_boundary_neumann.cc
+ebm3_boundary_ohmic.cc
+ebm3_boundary_resistance_ohmic.cc
+ebm3_boundary_resistance_schottky.cc
+ebm3_boundary_rr_interface.cc
+ebm3_boundary_schottky.cc
+ebm3_boundary_simple_gate.cc
+ebm3_boundary_solderpad.cc
+ebm3.cc
+ebm3_conductor.cc
+ebm3_conductor_hanging_node.cc
+ebm3_insulator.cc
+ebm3_insulator_hanging_node.cc
+ebm3_resistance.cc
+ebm3_resistance_hanging_node.cc
+ebm3_semiconductor.cc
+ebm3_semiconductor_hanging_node.cc
+ebm3_semiconductor_jacob.cc
+)
+
+INCLUDE_DIRECTORIES(${MXML_INCLUDE})
+ADD_LIBRARY(solver_ebm3 ${CXX_SRCS})
+

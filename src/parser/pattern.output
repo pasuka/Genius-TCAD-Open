@@ -1,0 +1,316 @@
+Terminale, die in Grammatik unbenutzt sind
+
+    BLANK
+    BAD_WORD
+
+
+Grammatik
+
+    0 $accept: inputfile $end
+
+    1 inputfile: command
+    2          | inputfile command
+
+    3 command: STRING_VALUE '{' parameters '}'
+    4        | STRING_VALUE '{' '}'
+    5        | COMMENT
+
+    6 parameters: parameter
+    7           | parameters parameter
+
+    8 parameter: STRING_VALUE BOOL BOOL_VALUE
+    9          | STRING_VALUE INTEGER INTEGER_VALUE
+   10          | STRING_VALUE REAL REAL_VALUE
+   11          | STRING_VALUE REAL INTEGER_VALUE
+   12          | STRING_VALUE STRING STRING_VALUE
+   13          | STRING_VALUE ENUM '<' string_values '>' STRING_VALUE
+
+   14 string_values: STRING_VALUE
+   15              | string_values STRING_VALUE
+
+
+Terminale und die Regeln, in denen sie verwendet werden
+
+    $end (0) 0
+    '<' (60) 13
+    '>' (62) 13
+    '{' (123) 3 4
+    '}' (125) 3 4
+    error (256)
+    INTEGER_VALUE <ival> (258) 9 11
+    REAL_VALUE <dval> (259) 10
+    STRING_VALUE <sval> (260) 3 4 8 9 10 11 12 13 14 15
+    BOOL_VALUE <bval> (261) 8
+    INTEGER <ival> (262) 9
+    REAL <ival> (263) 10 11
+    STRING <ival> (264) 12
+    BOOL <ival> (265) 8
+    ENUM <ival> (266) 13
+    BLANK <ival> (267)
+    COMMENT <ival> (268) 5
+    BAD_WORD <ival> (269)
+
+
+Nicht-Terminal und die Regeln, in denen sie verwendet werden
+
+    $accept (19)
+        auf der linken Seite: 0
+    inputfile (20)
+        auf der linken Seite: 1 2
+        auf der rechten Seite: 0 2
+    command (21)
+        auf der linken Seite: 3 4 5
+        auf der rechten Seite: 1 2
+    parameters (22)
+        auf der linken Seite: 6 7
+        auf der rechten Seite: 3 7
+    parameter (23)
+        auf der linken Seite: 8 9 10 11 12 13
+        auf der rechten Seite: 6 7
+    string_values (24)
+        auf der linken Seite: 14 15
+        auf der rechten Seite: 13 15
+
+
+Zustand 0
+
+    0 $accept: . inputfile $end
+
+    STRING_VALUE  schiebe und gehe zu Zustand 1 über
+    COMMENT       schiebe und gehe zu Zustand 2 über
+
+    inputfile  gehe zu Zustand 3 über
+    command    gehe zu Zustand 4 über
+
+
+Zustand 1
+
+    3 command: STRING_VALUE . '{' parameters '}'
+    4        | STRING_VALUE . '{' '}'
+
+    '{'  schiebe und gehe zu Zustand 5 über
+
+
+Zustand 2
+
+    5 command: COMMENT .
+
+    $default  reduziere mit Regel 5 (command)
+
+
+Zustand 3
+
+    0 $accept: inputfile . $end
+    2 inputfile: inputfile . command
+
+    $end          schiebe und gehe zu Zustand 6 über
+    STRING_VALUE  schiebe und gehe zu Zustand 1 über
+    COMMENT       schiebe und gehe zu Zustand 2 über
+
+    command  gehe zu Zustand 7 über
+
+
+Zustand 4
+
+    1 inputfile: command .
+
+    $default  reduziere mit Regel 1 (inputfile)
+
+
+Zustand 5
+
+    3 command: STRING_VALUE '{' . parameters '}'
+    4        | STRING_VALUE '{' . '}'
+
+    STRING_VALUE  schiebe und gehe zu Zustand 8 über
+    '}'           schiebe und gehe zu Zustand 9 über
+
+    parameters  gehe zu Zustand 10 über
+    parameter   gehe zu Zustand 11 über
+
+
+Zustand 6
+
+    0 $accept: inputfile $end .
+
+    $default  annehmen
+
+
+Zustand 7
+
+    2 inputfile: inputfile command .
+
+    $default  reduziere mit Regel 2 (inputfile)
+
+
+Zustand 8
+
+    8 parameter: STRING_VALUE . BOOL BOOL_VALUE
+    9          | STRING_VALUE . INTEGER INTEGER_VALUE
+   10          | STRING_VALUE . REAL REAL_VALUE
+   11          | STRING_VALUE . REAL INTEGER_VALUE
+   12          | STRING_VALUE . STRING STRING_VALUE
+   13          | STRING_VALUE . ENUM '<' string_values '>' STRING_VALUE
+
+    INTEGER  schiebe und gehe zu Zustand 12 über
+    REAL     schiebe und gehe zu Zustand 13 über
+    STRING   schiebe und gehe zu Zustand 14 über
+    BOOL     schiebe und gehe zu Zustand 15 über
+    ENUM     schiebe und gehe zu Zustand 16 über
+
+
+Zustand 9
+
+    4 command: STRING_VALUE '{' '}' .
+
+    $default  reduziere mit Regel 4 (command)
+
+
+Zustand 10
+
+    3 command: STRING_VALUE '{' parameters . '}'
+    7 parameters: parameters . parameter
+
+    STRING_VALUE  schiebe und gehe zu Zustand 8 über
+    '}'           schiebe und gehe zu Zustand 17 über
+
+    parameter  gehe zu Zustand 18 über
+
+
+Zustand 11
+
+    6 parameters: parameter .
+
+    $default  reduziere mit Regel 6 (parameters)
+
+
+Zustand 12
+
+    9 parameter: STRING_VALUE INTEGER . INTEGER_VALUE
+
+    INTEGER_VALUE  schiebe und gehe zu Zustand 19 über
+
+
+Zustand 13
+
+   10 parameter: STRING_VALUE REAL . REAL_VALUE
+   11          | STRING_VALUE REAL . INTEGER_VALUE
+
+    INTEGER_VALUE  schiebe und gehe zu Zustand 20 über
+    REAL_VALUE     schiebe und gehe zu Zustand 21 über
+
+
+Zustand 14
+
+   12 parameter: STRING_VALUE STRING . STRING_VALUE
+
+    STRING_VALUE  schiebe und gehe zu Zustand 22 über
+
+
+Zustand 15
+
+    8 parameter: STRING_VALUE BOOL . BOOL_VALUE
+
+    BOOL_VALUE  schiebe und gehe zu Zustand 23 über
+
+
+Zustand 16
+
+   13 parameter: STRING_VALUE ENUM . '<' string_values '>' STRING_VALUE
+
+    '<'  schiebe und gehe zu Zustand 24 über
+
+
+Zustand 17
+
+    3 command: STRING_VALUE '{' parameters '}' .
+
+    $default  reduziere mit Regel 3 (command)
+
+
+Zustand 18
+
+    7 parameters: parameters parameter .
+
+    $default  reduziere mit Regel 7 (parameters)
+
+
+Zustand 19
+
+    9 parameter: STRING_VALUE INTEGER INTEGER_VALUE .
+
+    $default  reduziere mit Regel 9 (parameter)
+
+
+Zustand 20
+
+   11 parameter: STRING_VALUE REAL INTEGER_VALUE .
+
+    $default  reduziere mit Regel 11 (parameter)
+
+
+Zustand 21
+
+   10 parameter: STRING_VALUE REAL REAL_VALUE .
+
+    $default  reduziere mit Regel 10 (parameter)
+
+
+Zustand 22
+
+   12 parameter: STRING_VALUE STRING STRING_VALUE .
+
+    $default  reduziere mit Regel 12 (parameter)
+
+
+Zustand 23
+
+    8 parameter: STRING_VALUE BOOL BOOL_VALUE .
+
+    $default  reduziere mit Regel 8 (parameter)
+
+
+Zustand 24
+
+   13 parameter: STRING_VALUE ENUM '<' . string_values '>' STRING_VALUE
+
+    STRING_VALUE  schiebe und gehe zu Zustand 25 über
+
+    string_values  gehe zu Zustand 26 über
+
+
+Zustand 25
+
+   14 string_values: STRING_VALUE .
+
+    $default  reduziere mit Regel 14 (string_values)
+
+
+Zustand 26
+
+   13 parameter: STRING_VALUE ENUM '<' string_values . '>' STRING_VALUE
+   15 string_values: string_values . STRING_VALUE
+
+    STRING_VALUE  schiebe und gehe zu Zustand 27 über
+    '>'           schiebe und gehe zu Zustand 28 über
+
+
+Zustand 27
+
+   15 string_values: string_values STRING_VALUE .
+
+    $default  reduziere mit Regel 15 (string_values)
+
+
+Zustand 28
+
+   13 parameter: STRING_VALUE ENUM '<' string_values '>' . STRING_VALUE
+
+    STRING_VALUE  schiebe und gehe zu Zustand 29 über
+
+
+Zustand 29
+
+   13 parameter: STRING_VALUE ENUM '<' string_values '>' STRING_VALUE .
+
+    $default  reduziere mit Regel 13 (parameter)

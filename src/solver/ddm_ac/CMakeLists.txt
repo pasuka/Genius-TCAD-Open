@@ -1,0 +1,29 @@
+
+SET (CXX_SRCS
+ddmac_boundary_ei_interface.cc
+ddmac_boundary_ev.cc
+ddmac_boundary_float_metal.cc
+ddmac_boundary_gate.cc
+ddmac_boundary_hetero_interface.cc
+ddmac_boundary_homo_interface.cc
+ddmac_boundary_ii_interface.cc
+ddmac_boundary_ir_interface.cc
+ddmac_boundary_is_interface.cc
+ddmac_boundary_iv.cc
+ddmac_boundary_neumann.cc
+ddmac_boundary_ohmic.cc
+ddmac_boundary_resistance_ohmic.cc
+ddmac_boundary_rr_interface.cc
+ddmac_boundary_schottky.cc
+ddmac_boundary_simple_gate.cc
+ddmac_boundary_solderpad.cc
+ddm_ac.cc
+ddmac_conductor.cc
+ddmac_insulator.cc
+ddmac_resistance.cc
+ddmac_semiconductor.cc
+)
+
+INCLUDE_DIRECTORIES(${MXML_INCLUDE})
+ADD_LIBRARY(solver_ddm_ac ${CXX_SRCS})
+

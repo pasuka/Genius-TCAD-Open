@@ -23,6 +23,7 @@
 #include <set>
 #include <sstream>
 #include <fstream>
+#include <unistd.h>
 
 #include "vector_value.h"
 #include "tensor_value.h"

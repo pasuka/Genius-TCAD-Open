@@ -1,0 +1,10 @@
+# project  configured on Sat Oct  9 11:03:21 2021 by
+# waf 1.6.4 (abi 98, python 20712f0 on linux2)
+# using ../../../waf configure build
+#
+----------------------------------------
+Setting top to
+/mnt/github/Genius-TCAD-Open/src/contrib/stanford
+----------------------------------------
+Setting out to
+/mnt/github/Genius-TCAD-Open/src/contrib/stanford/build

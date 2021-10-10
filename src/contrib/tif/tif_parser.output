@@ -1,0 +1,1143 @@
+Grammatik
+
+    0 $accept: tiffile $end
+
+    1 tiffile: record
+    2        | tiffile record
+
+    3 float: Integer
+    4      | Float
+
+    5 integer: Integer
+    6        | Float
+
+    7 solname: solname String
+    8        | String
+
+    9 value: value float
+   10      | float
+
+   11 parameters: parameters PARAMETER '=' float
+   12           | PARAMETER '=' float
+
+   13 boundary: boundary Boundary integer
+   14         | Boundary integer
+
+   15 interfacebd: interfacebd InterfaceBD integer
+   16            | InterfaceBD integer
+
+   17 namestring: namestring String CLine
+   18           | namestring String
+   19           | String
+
+   20 unitstring: unitstring String CLine
+   21           | unitstring String
+   22           | String
+
+   23 datalist: datalist float CLine
+   24         | datalist float
+   25         | float
+
+   26 record: Coordinate integer float float float
+   27       | Edge integer integer integer integer
+   28       | Region integer String String
+   29       | Region integer String String boundary
+   30       | Region integer String integer boundary
+   31       | Interface integer String String integer interfacebd
+   32       | Interface integer String String integer
+   33       | Interface integer String integer integer interfacebd
+   34       | Interface integer String integer integer
+   35       | Triangle integer integer integer integer integer integer integer integer
+   36       | Quadrangle integer integer integer integer integer integer
+   37       | Solution integer solname
+   38       | Component integer float float float float integer float float
+   39       | NodalSolution integer String value
+   40       | DataString String
+   41       | Dataname namestring
+   42       | DataUnit unitstring
+   43       | DataArray datalist
+   44       | MAT integer parameters
+   45       | Ignore
+
+
+Terminale und die Regeln, in denen sie verwendet werden
+
+    $end (0) 0
+    '=' (61) 11 12
+    error (256)
+    Coordinate <cval> (258) 26
+    Edge <cval> (259) 27
+    Region <cval> (260) 28 29 30
+    Boundary <cval> (261) 13 14
+    Interface <cval> (262) 31 32 33 34
+    InterfaceBD <cval> (263) 15 16
+    Triangle <cval> (264) 35
+    Quadrangle <cval> (265) 36
+    Solution <cval> (266) 37
+    NodalSolution <cval> (267) 39
+    Component <cval> (268) 38
+    DataString <ival> (269) 40
+    Dataname <ival> (270) 41
+    DataUnit <ival> (271) 42
+    DataArray <ival> (272) 43
+    CLine <ival> (273) 17 20 23
+    MAT <ival> (274) 44
+    Integer <ival> (275) 3 5
+    Float <dval> (276) 4 6
+    String <sval> (277) 7 8 17 18 19 20 21 22 28 29 30 31 32 33 34 39 40
+    PARAMETER <sval> (278) 11 12
+    Ignore <ival> (279) 45
+
+
+Nicht-Terminal und die Regeln, in denen sie verwendet werden
+
+    $accept (26)
+        auf der linken Seite: 0
+    tiffile (27)
+        auf der linken Seite: 1 2
+        auf der rechten Seite: 0 2
+    float <dval> (28)
+        auf der linken Seite: 3 4
+        auf der rechten Seite: 9 10 11 12 23 24 25 26 38
+    integer <ival> (29)
+        auf der linken Seite: 5 6
+        auf der rechten Seite: 13 14 15 16 26 27 28 29 30 31 32 33 34 35 36 37 38 39 44
+    solname (30)
+        auf der linken Seite: 7 8
+        auf der rechten Seite: 7 37
+    value (31)
+        auf der linken Seite: 9 10
+        auf der rechten Seite: 9 39
+    parameters (32)
+        auf der linken Seite: 11 12
+        auf der rechten Seite: 11 44
+    boundary (33)
+        auf der linken Seite: 13 14
+        auf der rechten Seite: 13 29 30
+    interfacebd (34)
+        auf der linken Seite: 15 16
+        auf der rechten Seite: 15 31 33
+    namestring (35)
+        auf der linken Seite: 17 18 19
+        auf der rechten Seite: 17 18 41
+    unitstring (36)
+        auf der linken Seite: 20 21 22
+        auf der rechten Seite: 20 21 42
+    datalist (37)
+        auf der linken Seite: 23 24 25
+        auf der rechten Seite: 23 24 43
+    record (38)
+        auf der linken Seite: 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+        auf der rechten Seite: 1 2
+
+
+Zustand 0
+
+    0 $accept: . tiffile $end
+
+    Coordinate     schiebe und gehe zu Zustand 1 über
+    Edge           schiebe und gehe zu Zustand 2 über
+    Region         schiebe und gehe zu Zustand 3 über
+    Interface      schiebe und gehe zu Zustand 4 über
+    Triangle       schiebe und gehe zu Zustand 5 über
+    Quadrangle     schiebe und gehe zu Zustand 6 über
+    Solution       schiebe und gehe zu Zustand 7 über
+    NodalSolution  schiebe und gehe zu Zustand 8 über
+    Component      schiebe und gehe zu Zustand 9 über
+    DataString     schiebe und gehe zu Zustand 10 über
+    Dataname       schiebe und gehe zu Zustand 11 über
+    DataUnit       schiebe und gehe zu Zustand 12 über
+    DataArray      schiebe und gehe zu Zustand 13 über
+    MAT            schiebe und gehe zu Zustand 14 über
+    Ignore         schiebe und gehe zu Zustand 15 über
+
+    tiffile  gehe zu Zustand 16 über
+    record   gehe zu Zustand 17 über
+
+
+Zustand 1
+
+   26 record: Coordinate . integer float float float
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 20 über
+
+
+Zustand 2
+
+   27 record: Edge . integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 21 über
+
+
+Zustand 3
+
+   28 record: Region . integer String String
+   29       | Region . integer String String boundary
+   30       | Region . integer String integer boundary
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 22 über
+
+
+Zustand 4
+
+   31 record: Interface . integer String String integer interfacebd
+   32       | Interface . integer String String integer
+   33       | Interface . integer String integer integer interfacebd
+   34       | Interface . integer String integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 23 über
+
+
+Zustand 5
+
+   35 record: Triangle . integer integer integer integer integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 24 über
+
+
+Zustand 6
+
+   36 record: Quadrangle . integer integer integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 25 über
+
+
+Zustand 7
+
+   37 record: Solution . integer solname
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 26 über
+
+
+Zustand 8
+
+   39 record: NodalSolution . integer String value
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 27 über
+
+
+Zustand 9
+
+   38 record: Component . integer float float float float integer float float
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 28 über
+
+
+Zustand 10
+
+   40 record: DataString . String
+
+    String  schiebe und gehe zu Zustand 29 über
+
+
+Zustand 11
+
+   41 record: Dataname . namestring
+
+    String  schiebe und gehe zu Zustand 30 über
+
+    namestring  gehe zu Zustand 31 über
+
+
+Zustand 12
+
+   42 record: DataUnit . unitstring
+
+    String  schiebe und gehe zu Zustand 32 über
+
+    unitstring  gehe zu Zustand 33 über
+
+
+Zustand 13
+
+   43 record: DataArray . datalist
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float     gehe zu Zustand 36 über
+    datalist  gehe zu Zustand 37 über
+
+
+Zustand 14
+
+   44 record: MAT . integer parameters
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 38 über
+
+
+Zustand 15
+
+   45 record: Ignore .
+
+    $default  reduziere mit Regel 45 (record)
+
+
+Zustand 16
+
+    0 $accept: tiffile . $end
+    2 tiffile: tiffile . record
+
+    $end           schiebe und gehe zu Zustand 39 über
+    Coordinate     schiebe und gehe zu Zustand 1 über
+    Edge           schiebe und gehe zu Zustand 2 über
+    Region         schiebe und gehe zu Zustand 3 über
+    Interface      schiebe und gehe zu Zustand 4 über
+    Triangle       schiebe und gehe zu Zustand 5 über
+    Quadrangle     schiebe und gehe zu Zustand 6 über
+    Solution       schiebe und gehe zu Zustand 7 über
+    NodalSolution  schiebe und gehe zu Zustand 8 über
+    Component      schiebe und gehe zu Zustand 9 über
+    DataString     schiebe und gehe zu Zustand 10 über
+    Dataname       schiebe und gehe zu Zustand 11 über
+    DataUnit       schiebe und gehe zu Zustand 12 über
+    DataArray      schiebe und gehe zu Zustand 13 über
+    MAT            schiebe und gehe zu Zustand 14 über
+    Ignore         schiebe und gehe zu Zustand 15 über
+
+    record  gehe zu Zustand 40 über
+
+
+Zustand 17
+
+    1 tiffile: record .
+
+    $default  reduziere mit Regel 1 (tiffile)
+
+
+Zustand 18
+
+    5 integer: Integer .
+
+    $default  reduziere mit Regel 5 (integer)
+
+
+Zustand 19
+
+    6 integer: Float .
+
+    $default  reduziere mit Regel 6 (integer)
+
+
+Zustand 20
+
+   26 record: Coordinate integer . float float float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 41 über
+
+
+Zustand 21
+
+   27 record: Edge integer . integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 42 über
+
+
+Zustand 22
+
+   28 record: Region integer . String String
+   29       | Region integer . String String boundary
+   30       | Region integer . String integer boundary
+
+    String  schiebe und gehe zu Zustand 43 über
+
+
+Zustand 23
+
+   31 record: Interface integer . String String integer interfacebd
+   32       | Interface integer . String String integer
+   33       | Interface integer . String integer integer interfacebd
+   34       | Interface integer . String integer integer
+
+    String  schiebe und gehe zu Zustand 44 über
+
+
+Zustand 24
+
+   35 record: Triangle integer . integer integer integer integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 45 über
+
+
+Zustand 25
+
+   36 record: Quadrangle integer . integer integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 46 über
+
+
+Zustand 26
+
+   37 record: Solution integer . solname
+
+    String  schiebe und gehe zu Zustand 47 über
+
+    solname  gehe zu Zustand 48 über
+
+
+Zustand 27
+
+   39 record: NodalSolution integer . String value
+
+    String  schiebe und gehe zu Zustand 49 über
+
+
+Zustand 28
+
+   38 record: Component integer . float float float float integer float float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 50 über
+
+
+Zustand 29
+
+   40 record: DataString String .
+
+    $default  reduziere mit Regel 40 (record)
+
+
+Zustand 30
+
+   19 namestring: String .
+
+    $default  reduziere mit Regel 19 (namestring)
+
+
+Zustand 31
+
+   17 namestring: namestring . String CLine
+   18           | namestring . String
+   41 record: Dataname namestring .
+
+    String  schiebe und gehe zu Zustand 51 über
+
+    $default  reduziere mit Regel 41 (record)
+
+
+Zustand 32
+
+   22 unitstring: String .
+
+    $default  reduziere mit Regel 22 (unitstring)
+
+
+Zustand 33
+
+   20 unitstring: unitstring . String CLine
+   21           | unitstring . String
+   42 record: DataUnit unitstring .
+
+    String  schiebe und gehe zu Zustand 52 über
+
+    $default  reduziere mit Regel 42 (record)
+
+
+Zustand 34
+
+    3 float: Integer .
+
+    $default  reduziere mit Regel 3 (float)
+
+
+Zustand 35
+
+    4 float: Float .
+
+    $default  reduziere mit Regel 4 (float)
+
+
+Zustand 36
+
+   25 datalist: float .
+
+    $default  reduziere mit Regel 25 (datalist)
+
+
+Zustand 37
+
+   23 datalist: datalist . float CLine
+   24         | datalist . float
+   43 record: DataArray datalist .
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    $default  reduziere mit Regel 43 (record)
+
+    float  gehe zu Zustand 53 über
+
+
+Zustand 38
+
+   44 record: MAT integer . parameters
+
+    PARAMETER  schiebe und gehe zu Zustand 54 über
+
+    parameters  gehe zu Zustand 55 über
+
+
+Zustand 39
+
+    0 $accept: tiffile $end .
+
+    $default  annehmen
+
+
+Zustand 40
+
+    2 tiffile: tiffile record .
+
+    $default  reduziere mit Regel 2 (tiffile)
+
+
+Zustand 41
+
+   26 record: Coordinate integer float . float float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 56 über
+
+
+Zustand 42
+
+   27 record: Edge integer integer . integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 57 über
+
+
+Zustand 43
+
+   28 record: Region integer String . String
+   29       | Region integer String . String boundary
+   30       | Region integer String . integer boundary
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+    String   schiebe und gehe zu Zustand 58 über
+
+    integer  gehe zu Zustand 59 über
+
+
+Zustand 44
+
+   31 record: Interface integer String . String integer interfacebd
+   32       | Interface integer String . String integer
+   33       | Interface integer String . integer integer interfacebd
+   34       | Interface integer String . integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+    String   schiebe und gehe zu Zustand 60 über
+
+    integer  gehe zu Zustand 61 über
+
+
+Zustand 45
+
+   35 record: Triangle integer integer . integer integer integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 62 über
+
+
+Zustand 46
+
+   36 record: Quadrangle integer integer . integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 63 über
+
+
+Zustand 47
+
+    8 solname: String .
+
+    $default  reduziere mit Regel 8 (solname)
+
+
+Zustand 48
+
+    7 solname: solname . String
+   37 record: Solution integer solname .
+
+    String  schiebe und gehe zu Zustand 64 über
+
+    $default  reduziere mit Regel 37 (record)
+
+
+Zustand 49
+
+   39 record: NodalSolution integer String . value
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 65 über
+    value  gehe zu Zustand 66 über
+
+
+Zustand 50
+
+   38 record: Component integer float . float float float integer float float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 67 über
+
+
+Zustand 51
+
+   17 namestring: namestring String . CLine
+   18           | namestring String .
+
+    CLine  schiebe und gehe zu Zustand 68 über
+
+    $default  reduziere mit Regel 18 (namestring)
+
+
+Zustand 52
+
+   20 unitstring: unitstring String . CLine
+   21           | unitstring String .
+
+    CLine  schiebe und gehe zu Zustand 69 über
+
+    $default  reduziere mit Regel 21 (unitstring)
+
+
+Zustand 53
+
+   23 datalist: datalist float . CLine
+   24         | datalist float .
+
+    CLine  schiebe und gehe zu Zustand 70 über
+
+    $default  reduziere mit Regel 24 (datalist)
+
+
+Zustand 54
+
+   12 parameters: PARAMETER . '=' float
+
+    '='  schiebe und gehe zu Zustand 71 über
+
+
+Zustand 55
+
+   11 parameters: parameters . PARAMETER '=' float
+   44 record: MAT integer parameters .
+
+    PARAMETER  schiebe und gehe zu Zustand 72 über
+
+    $default  reduziere mit Regel 44 (record)
+
+
+Zustand 56
+
+   26 record: Coordinate integer float float . float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 73 über
+
+
+Zustand 57
+
+   27 record: Edge integer integer integer . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 74 über
+
+
+Zustand 58
+
+   28 record: Region integer String String .
+   29       | Region integer String String . boundary
+
+    Boundary  schiebe und gehe zu Zustand 75 über
+
+    $default  reduziere mit Regel 28 (record)
+
+    boundary  gehe zu Zustand 76 über
+
+
+Zustand 59
+
+   30 record: Region integer String integer . boundary
+
+    Boundary  schiebe und gehe zu Zustand 75 über
+
+    boundary  gehe zu Zustand 77 über
+
+
+Zustand 60
+
+   31 record: Interface integer String String . integer interfacebd
+   32       | Interface integer String String . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 78 über
+
+
+Zustand 61
+
+   33 record: Interface integer String integer . integer interfacebd
+   34       | Interface integer String integer . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 79 über
+
+
+Zustand 62
+
+   35 record: Triangle integer integer integer . integer integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 80 über
+
+
+Zustand 63
+
+   36 record: Quadrangle integer integer integer . integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 81 über
+
+
+Zustand 64
+
+    7 solname: solname String .
+
+    $default  reduziere mit Regel 7 (solname)
+
+
+Zustand 65
+
+   10 value: float .
+
+    $default  reduziere mit Regel 10 (value)
+
+
+Zustand 66
+
+    9 value: value . float
+   39 record: NodalSolution integer String value .
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    $default  reduziere mit Regel 39 (record)
+
+    float  gehe zu Zustand 82 über
+
+
+Zustand 67
+
+   38 record: Component integer float float . float float integer float float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 83 über
+
+
+Zustand 68
+
+   17 namestring: namestring String CLine .
+
+    $default  reduziere mit Regel 17 (namestring)
+
+
+Zustand 69
+
+   20 unitstring: unitstring String CLine .
+
+    $default  reduziere mit Regel 20 (unitstring)
+
+
+Zustand 70
+
+   23 datalist: datalist float CLine .
+
+    $default  reduziere mit Regel 23 (datalist)
+
+
+Zustand 71
+
+   12 parameters: PARAMETER '=' . float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 84 über
+
+
+Zustand 72
+
+   11 parameters: parameters PARAMETER . '=' float
+
+    '='  schiebe und gehe zu Zustand 85 über
+
+
+Zustand 73
+
+   26 record: Coordinate integer float float float .
+
+    $default  reduziere mit Regel 26 (record)
+
+
+Zustand 74
+
+   27 record: Edge integer integer integer integer .
+
+    $default  reduziere mit Regel 27 (record)
+
+
+Zustand 75
+
+   14 boundary: Boundary . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 86 über
+
+
+Zustand 76
+
+   13 boundary: boundary . Boundary integer
+   29 record: Region integer String String boundary .
+
+    Boundary  schiebe und gehe zu Zustand 87 über
+
+    $default  reduziere mit Regel 29 (record)
+
+
+Zustand 77
+
+   13 boundary: boundary . Boundary integer
+   30 record: Region integer String integer boundary .
+
+    Boundary  schiebe und gehe zu Zustand 87 über
+
+    $default  reduziere mit Regel 30 (record)
+
+
+Zustand 78
+
+   31 record: Interface integer String String integer . interfacebd
+   32       | Interface integer String String integer .
+
+    InterfaceBD  schiebe und gehe zu Zustand 88 über
+
+    $default  reduziere mit Regel 32 (record)
+
+    interfacebd  gehe zu Zustand 89 über
+
+
+Zustand 79
+
+   33 record: Interface integer String integer integer . interfacebd
+   34       | Interface integer String integer integer .
+
+    InterfaceBD  schiebe und gehe zu Zustand 88 über
+
+    $default  reduziere mit Regel 34 (record)
+
+    interfacebd  gehe zu Zustand 90 über
+
+
+Zustand 80
+
+   35 record: Triangle integer integer integer integer . integer integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 91 über
+
+
+Zustand 81
+
+   36 record: Quadrangle integer integer integer integer . integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 92 über
+
+
+Zustand 82
+
+    9 value: value float .
+
+    $default  reduziere mit Regel 9 (value)
+
+
+Zustand 83
+
+   38 record: Component integer float float float . float integer float float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 93 über
+
+
+Zustand 84
+
+   12 parameters: PARAMETER '=' float .
+
+    $default  reduziere mit Regel 12 (parameters)
+
+
+Zustand 85
+
+   11 parameters: parameters PARAMETER '=' . float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 94 über
+
+
+Zustand 86
+
+   14 boundary: Boundary integer .
+
+    $default  reduziere mit Regel 14 (boundary)
+
+
+Zustand 87
+
+   13 boundary: boundary Boundary . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 95 über
+
+
+Zustand 88
+
+   16 interfacebd: InterfaceBD . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 96 über
+
+
+Zustand 89
+
+   15 interfacebd: interfacebd . InterfaceBD integer
+   31 record: Interface integer String String integer interfacebd .
+
+    InterfaceBD  schiebe und gehe zu Zustand 97 über
+
+    $default  reduziere mit Regel 31 (record)
+
+
+Zustand 90
+
+   15 interfacebd: interfacebd . InterfaceBD integer
+   33 record: Interface integer String integer integer interfacebd .
+
+    InterfaceBD  schiebe und gehe zu Zustand 97 über
+
+    $default  reduziere mit Regel 33 (record)
+
+
+Zustand 91
+
+   35 record: Triangle integer integer integer integer integer . integer integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 98 über
+
+
+Zustand 92
+
+   36 record: Quadrangle integer integer integer integer integer . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 99 über
+
+
+Zustand 93
+
+   38 record: Component integer float float float float . integer float float
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 100 über
+
+
+Zustand 94
+
+   11 parameters: parameters PARAMETER '=' float .
+
+    $default  reduziere mit Regel 11 (parameters)
+
+
+Zustand 95
+
+   13 boundary: boundary Boundary integer .
+
+    $default  reduziere mit Regel 13 (boundary)
+
+
+Zustand 96
+
+   16 interfacebd: InterfaceBD integer .
+
+    $default  reduziere mit Regel 16 (interfacebd)
+
+
+Zustand 97
+
+   15 interfacebd: interfacebd InterfaceBD . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 101 über
+
+
+Zustand 98
+
+   35 record: Triangle integer integer integer integer integer integer . integer integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 102 über
+
+
+Zustand 99
+
+   36 record: Quadrangle integer integer integer integer integer integer .
+
+    $default  reduziere mit Regel 36 (record)
+
+
+Zustand 100
+
+   38 record: Component integer float float float float integer . float float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 103 über
+
+
+Zustand 101
+
+   15 interfacebd: interfacebd InterfaceBD integer .
+
+    $default  reduziere mit Regel 15 (interfacebd)
+
+
+Zustand 102
+
+   35 record: Triangle integer integer integer integer integer integer integer . integer
+
+    Integer  schiebe und gehe zu Zustand 18 über
+    Float    schiebe und gehe zu Zustand 19 über
+
+    integer  gehe zu Zustand 104 über
+
+
+Zustand 103
+
+   38 record: Component integer float float float float integer float . float
+
+    Integer  schiebe und gehe zu Zustand 34 über
+    Float    schiebe und gehe zu Zustand 35 über
+
+    float  gehe zu Zustand 105 über
+
+
+Zustand 104
+
+   35 record: Triangle integer integer integer integer integer integer integer integer .
+
+    $default  reduziere mit Regel 35 (record)
+
+
+Zustand 105
+
+   38 record: Component integer float float float float integer float float .
+
+    $default  reduziere mit Regel 38 (record)

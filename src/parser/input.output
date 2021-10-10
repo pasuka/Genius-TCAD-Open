@@ -1,0 +1,2443 @@
+Terminale, die in Grammatik unbenutzt sind
+
+    ENDFILE
+    BLANK
+    BAD_WORD
+    MOD
+    LOWEST
+    ELSE
+    UNARYHIGH
+    LEFTSQUARE
+    LEFTPAREN
+    HIGHEST
+
+
+Grammatik
+
+    0 $accept: inputfile $end
+
+    1 inputfile: TITLE STRING_VALUE
+    2          | command
+    3          | inputfile command
+
+    4 command: statement LINEINFO
+    5        | expr ';' LINEINFO
+    6        | BOOL_TYPE BOOL_ID '=' bool_expr ';' LINEINFO
+    7        | INT_TYPE INT_ID '=' int_expr ';' LINEINFO
+    8        | REAL_TYPE REAL_ID '=' real_expr ';' LINEINFO
+    9        | STRING_TYPE STRING_ID '=' string_expr ';' LINEINFO
+   10        | COMMENT LINEINFO
+   11        | LINEINFO
+
+   12 statement: KEYWORD
+   13          | KEYWORD parameters
+
+   14 expr: %empty
+   15     | BOOL_ID '=' bool_expr
+   16     | INT_ID '=' int_expr
+   17     | REAL_ID '=' real_expr
+   18     | STRING_ID '=' string_expr
+
+   19 bool_expr: BOOL_VALUE
+   20          | BOOL_ID
+   21          | bool_expr AND bool_expr
+   22          | bool_expr OR bool_expr
+   23          | bool_expr EQ bool_expr
+   24          | bool_expr NE bool_expr
+   25          | '(' bool_expr ')'
+   26          | NOT bool_expr
+   27          | real_expr LT real_expr
+   28          | real_expr GT real_expr
+   29          | real_expr LE real_expr
+   30          | real_expr GE real_expr
+   31          | real_expr EQ real_expr
+   32          | real_expr NE real_expr
+
+   33 int_expr: INT_VALUE
+   34         | INT_ID
+   35         | '(' int_expr ')'
+   36         | int_expr PLUS int_expr
+   37         | int_expr MINUS int_expr
+   38         | int_expr ASTERISK int_expr
+   39         | int_expr DIVIDE int_expr
+   40         | MINUS int_expr
+   41         | PLUS int_expr
+
+   42 real_expr: REAL_VALUE
+   43          | INT_VALUE
+   44          | REAL_ID
+   45          | INT_ID
+   46          | '(' real_expr ')'
+   47          | real_expr PLUS real_expr
+   48          | real_expr MINUS real_expr
+   49          | real_expr ASTERISK real_expr
+   50          | real_expr DIVIDE real_expr
+   51          | MINUS real_expr
+   52          | PLUS real_expr
+
+   53 string_expr: STRING_VALUE
+   54            | STRING_ID
+   55            | INT_ID
+   56            | string_expr PLUS string_expr
+
+   57 bool_exprs: bool_expr
+   58           | bool_exprs ',' bool_expr
+
+   59 real_exprs: real_expr
+   60           | real_exprs ',' real_expr
+
+   61 int_exprs: int_expr
+   62          | int_exprs ',' int_expr
+
+   63 string_exprs: string_expr
+   64             | string_exprs ',' string_expr
+
+   65 parameters: parameter
+   66           | parameters parameter
+
+   67 parameter: REAL_PARAMETER '=' real_expr
+   68          | UD_REAL_PARAMETER '=' real_expr
+   69          | REAL_PARAMETER '=' '[' real_exprs ']'
+   70          | UD_REAL_PARAMETER '=' '[' real_exprs ']'
+   71          | INT_PARAMETER '=' int_expr
+   72          | UD_INT_PARAMETER '=' int_expr
+   73          | INT_PARAMETER '=' '[' int_exprs ']'
+   74          | UD_INT_PARAMETER '=' '[' int_exprs ']'
+   75          | STRING_PARAMETER '=' string_expr
+   76          | UD_STRING_PARAMETER '=' string_expr
+   77          | STRING_PARAMETER '=' '[' string_exprs ']'
+   78          | STRING_PARAMETER
+   79          | UD_STRING_PARAMETER '=' '[' string_exprs ']'
+   80          | BOOL_PARAMETER '=' bool_expr
+   81          | UD_BOOL_PARAMETER '=' bool_expr
+   82          | BOOL_PARAMETER '=' '[' bool_exprs ']'
+   83          | UD_BOOL_PARAMETER '=' '[' bool_exprs ']'
+
+
+Terminale und die Regeln, in denen sie verwendet werden
+
+    $end (0) 0
+    '(' (40) 25 35 46
+    ')' (41) 25 35 46
+    ',' (44) 58 60 62 64
+    ';' (59) 5 6 7 8 9
+    '=' (61) 6 7 8 9 15 16 17 18 67 68 69 70 71 72 73 74 75 76 77 79 80 81 82 83
+    '[' (91) 69 70 73 74 77 79 82 83
+    ']' (93) 69 70 73 74 77 79 82 83
+    error (256)
+    LINEINFO <sval> (258) 4 5 6 7 8 9 10 11
+    TITLE <sval> (259) 1
+    KEYWORD <sval> (260) 12 13
+    BOOL_PARAMETER <sval> (261) 80 82
+    REAL_PARAMETER <sval> (262) 67 69
+    INT_PARAMETER <sval> (263) 71 73
+    STRING_PARAMETER <sval> (264) 75 77 78
+    UD_BOOL_PARAMETER <sval> (265) 81 83
+    UD_REAL_PARAMETER <sval> (266) 68 70
+    UD_INT_PARAMETER <sval> (267) 72 74
+    UD_STRING_PARAMETER <sval> (268) 76 79
+    INT_TYPE (269) 7
+    REAL_TYPE (270) 8
+    BOOL_TYPE (271) 6
+    STRING_TYPE (272) 9
+    INT_ID <sval> (273) 7 16 34 45 55
+    REAL_ID <sval> (274) 8 17 44
+    BOOL_ID <sval> (275) 6 15 20
+    STRING_ID <sval> (276) 9 18 54
+    INT_VALUE <ival> (277) 33 43
+    REAL_VALUE <dval> (278) 42
+    STRING_VALUE <sval> (279) 1 53
+    BOOL_VALUE <bval> (280) 19
+    ENDFILE (281)
+    BLANK (282)
+    COMMENT (283) 10
+    BAD_WORD (284)
+    GE (285) 30
+    GT (286) 28
+    LE (287) 29
+    LT (288) 27
+    EQ (289) 23 31
+    NE (290) 24 32
+    NOT (291) 26
+    OR (292) 22
+    AND (293) 21
+    PLUS (294) 36 41 47 52 56
+    MINUS (295) 37 40 48 51
+    ASTERISK (296) 38 49
+    DIVIDE (297) 39 50
+    MOD (298)
+    LOWEST (299)
+    ELSE (300)
+    UNARYLOW (301)
+    UNARYHIGH (302)
+    LEFTSQUARE (303)
+    LEFTPAREN (304)
+    HIGHEST (305)
+
+
+Nicht-Terminal und die Regeln, in denen sie verwendet werden
+
+    $accept (58)
+        auf der linken Seite: 0
+    inputfile (59)
+        auf der linken Seite: 1 2 3
+        auf der rechten Seite: 0 3
+    command (60)
+        auf der linken Seite: 4 5 6 7 8 9 10 11
+        auf der rechten Seite: 2 3
+    statement <card> (61)
+        auf der linken Seite: 12 13
+        auf der rechten Seite: 4
+    expr (62)
+        auf der linken Seite: 14 15 16 17 18
+        auf der rechten Seite: 5
+    bool_expr <bval> (63)
+        auf der linken Seite: 19 20 21 22 23 24 25 26 27 28 29 30 31 32
+        auf der rechten Seite: 6 15 21 22 23 24 25 26 57 58 80 81
+    int_expr <ival> (64)
+        auf der linken Seite: 33 34 35 36 37 38 39 40 41
+        auf der rechten Seite: 7 16 35 36 37 38 39 40 41 61 62 71 72
+    real_expr <dval> (65)
+        auf der linken Seite: 42 43 44 45 46 47 48 49 50 51 52
+        auf der rechten Seite: 8 17 27 28 29 30 31 32 46 47 48 49 50 51 52 59 60 67 68
+    string_expr <sval> (66)
+        auf der linken Seite: 53 54 55 56
+        auf der rechten Seite: 9 18 56 63 64 75 76
+    bool_exprs <bool_array> (67)
+        auf der linken Seite: 57 58
+        auf der rechten Seite: 58 82 83
+    real_exprs <real_array> (68)
+        auf der linken Seite: 59 60
+        auf der rechten Seite: 60 69 70
+    int_exprs <int_array> (69)
+        auf der linken Seite: 61 62
+        auf der rechten Seite: 62 73 74
+    string_exprs <string_array> (70)
+        auf der linken Seite: 63 64
+        auf der rechten Seite: 64 77 79
+    parameters <parameter_array> (71)
+        auf der linken Seite: 65 66
+        auf der rechten Seite: 13 66
+    parameter <parameter> (72)
+        auf der linken Seite: 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83
+        auf der rechten Seite: 65 66
+
+
+Zustand 0
+
+    0 $accept: . inputfile $end
+
+    LINEINFO     schiebe und gehe zu Zustand 1 über
+    TITLE        schiebe und gehe zu Zustand 2 über
+    KEYWORD      schiebe und gehe zu Zustand 3 über
+    INT_TYPE     schiebe und gehe zu Zustand 4 über
+    REAL_TYPE    schiebe und gehe zu Zustand 5 über
+    BOOL_TYPE    schiebe und gehe zu Zustand 6 über
+    STRING_TYPE  schiebe und gehe zu Zustand 7 über
+    INT_ID       schiebe und gehe zu Zustand 8 über
+    REAL_ID      schiebe und gehe zu Zustand 9 über
+    BOOL_ID      schiebe und gehe zu Zustand 10 über
+    STRING_ID    schiebe und gehe zu Zustand 11 über
+    COMMENT      schiebe und gehe zu Zustand 12 über
+
+    $default  reduziere mit Regel 14 (expr)
+
+    inputfile  gehe zu Zustand 13 über
+    command    gehe zu Zustand 14 über
+    statement  gehe zu Zustand 15 über
+    expr       gehe zu Zustand 16 über
+
+
+Zustand 1
+
+   11 command: LINEINFO .
+
+    $default  reduziere mit Regel 11 (command)
+
+
+Zustand 2
+
+    1 inputfile: TITLE . STRING_VALUE
+
+    STRING_VALUE  schiebe und gehe zu Zustand 17 über
+
+
+Zustand 3
+
+   12 statement: KEYWORD .
+   13          | KEYWORD . parameters
+
+    BOOL_PARAMETER       schiebe und gehe zu Zustand 18 über
+    REAL_PARAMETER       schiebe und gehe zu Zustand 19 über
+    INT_PARAMETER        schiebe und gehe zu Zustand 20 über
+    STRING_PARAMETER     schiebe und gehe zu Zustand 21 über
+    UD_BOOL_PARAMETER    schiebe und gehe zu Zustand 22 über
+    UD_REAL_PARAMETER    schiebe und gehe zu Zustand 23 über
+    UD_INT_PARAMETER     schiebe und gehe zu Zustand 24 über
+    UD_STRING_PARAMETER  schiebe und gehe zu Zustand 25 über
+
+    $default  reduziere mit Regel 12 (statement)
+
+    parameters  gehe zu Zustand 26 über
+    parameter   gehe zu Zustand 27 über
+
+
+Zustand 4
+
+    7 command: INT_TYPE . INT_ID '=' int_expr ';' LINEINFO
+
+    INT_ID  schiebe und gehe zu Zustand 28 über
+
+
+Zustand 5
+
+    8 command: REAL_TYPE . REAL_ID '=' real_expr ';' LINEINFO
+
+    REAL_ID  schiebe und gehe zu Zustand 29 über
+
+
+Zustand 6
+
+    6 command: BOOL_TYPE . BOOL_ID '=' bool_expr ';' LINEINFO
+
+    BOOL_ID  schiebe und gehe zu Zustand 30 über
+
+
+Zustand 7
+
+    9 command: STRING_TYPE . STRING_ID '=' string_expr ';' LINEINFO
+
+    STRING_ID  schiebe und gehe zu Zustand 31 über
+
+
+Zustand 8
+
+   16 expr: INT_ID . '=' int_expr
+
+    '='  schiebe und gehe zu Zustand 32 über
+
+
+Zustand 9
+
+   17 expr: REAL_ID . '=' real_expr
+
+    '='  schiebe und gehe zu Zustand 33 über
+
+
+Zustand 10
+
+   15 expr: BOOL_ID . '=' bool_expr
+
+    '='  schiebe und gehe zu Zustand 34 über
+
+
+Zustand 11
+
+   18 expr: STRING_ID . '=' string_expr
+
+    '='  schiebe und gehe zu Zustand 35 über
+
+
+Zustand 12
+
+   10 command: COMMENT . LINEINFO
+
+    LINEINFO  schiebe und gehe zu Zustand 36 über
+
+
+Zustand 13
+
+    0 $accept: inputfile . $end
+    3 inputfile: inputfile . command
+
+    $end         schiebe und gehe zu Zustand 37 über
+    LINEINFO     schiebe und gehe zu Zustand 1 über
+    KEYWORD      schiebe und gehe zu Zustand 3 über
+    INT_TYPE     schiebe und gehe zu Zustand 4 über
+    REAL_TYPE    schiebe und gehe zu Zustand 5 über
+    BOOL_TYPE    schiebe und gehe zu Zustand 6 über
+    STRING_TYPE  schiebe und gehe zu Zustand 7 über
+    INT_ID       schiebe und gehe zu Zustand 8 über
+    REAL_ID      schiebe und gehe zu Zustand 9 über
+    BOOL_ID      schiebe und gehe zu Zustand 10 über
+    STRING_ID    schiebe und gehe zu Zustand 11 über
+    COMMENT      schiebe und gehe zu Zustand 12 über
+
+    $default  reduziere mit Regel 14 (expr)
+
+    command    gehe zu Zustand 38 über
+    statement  gehe zu Zustand 15 über
+    expr       gehe zu Zustand 16 über
+
+
+Zustand 14
+
+    2 inputfile: command .
+
+    $default  reduziere mit Regel 2 (inputfile)
+
+
+Zustand 15
+
+    4 command: statement . LINEINFO
+
+    LINEINFO  schiebe und gehe zu Zustand 39 über
+
+
+Zustand 16
+
+    5 command: expr . ';' LINEINFO
+
+    ';'  schiebe und gehe zu Zustand 40 über
+
+
+Zustand 17
+
+    1 inputfile: TITLE STRING_VALUE .
+
+    $default  reduziere mit Regel 1 (inputfile)
+
+
+Zustand 18
+
+   80 parameter: BOOL_PARAMETER . '=' bool_expr
+   82          | BOOL_PARAMETER . '=' '[' bool_exprs ']'
+
+    '='  schiebe und gehe zu Zustand 41 über
+
+
+Zustand 19
+
+   67 parameter: REAL_PARAMETER . '=' real_expr
+   69          | REAL_PARAMETER . '=' '[' real_exprs ']'
+
+    '='  schiebe und gehe zu Zustand 42 über
+
+
+Zustand 20
+
+   71 parameter: INT_PARAMETER . '=' int_expr
+   73          | INT_PARAMETER . '=' '[' int_exprs ']'
+
+    '='  schiebe und gehe zu Zustand 43 über
+
+
+Zustand 21
+
+   75 parameter: STRING_PARAMETER . '=' string_expr
+   77          | STRING_PARAMETER . '=' '[' string_exprs ']'
+   78          | STRING_PARAMETER .
+
+    '='  schiebe und gehe zu Zustand 44 über
+
+    $default  reduziere mit Regel 78 (parameter)
+
+
+Zustand 22
+
+   81 parameter: UD_BOOL_PARAMETER . '=' bool_expr
+   83          | UD_BOOL_PARAMETER . '=' '[' bool_exprs ']'
+
+    '='  schiebe und gehe zu Zustand 45 über
+
+
+Zustand 23
+
+   68 parameter: UD_REAL_PARAMETER . '=' real_expr
+   70          | UD_REAL_PARAMETER . '=' '[' real_exprs ']'
+
+    '='  schiebe und gehe zu Zustand 46 über
+
+
+Zustand 24
+
+   72 parameter: UD_INT_PARAMETER . '=' int_expr
+   74          | UD_INT_PARAMETER . '=' '[' int_exprs ']'
+
+    '='  schiebe und gehe zu Zustand 47 über
+
+
+Zustand 25
+
+   76 parameter: UD_STRING_PARAMETER . '=' string_expr
+   79          | UD_STRING_PARAMETER . '=' '[' string_exprs ']'
+
+    '='  schiebe und gehe zu Zustand 48 über
+
+
+Zustand 26
+
+   13 statement: KEYWORD parameters .
+   66 parameters: parameters . parameter
+
+    BOOL_PARAMETER       schiebe und gehe zu Zustand 18 über
+    REAL_PARAMETER       schiebe und gehe zu Zustand 19 über
+    INT_PARAMETER        schiebe und gehe zu Zustand 20 über
+    STRING_PARAMETER     schiebe und gehe zu Zustand 21 über
+    UD_BOOL_PARAMETER    schiebe und gehe zu Zustand 22 über
+    UD_REAL_PARAMETER    schiebe und gehe zu Zustand 23 über
+    UD_INT_PARAMETER     schiebe und gehe zu Zustand 24 über
+    UD_STRING_PARAMETER  schiebe und gehe zu Zustand 25 über
+
+    $default  reduziere mit Regel 13 (statement)
+
+    parameter  gehe zu Zustand 49 über
+
+
+Zustand 27
+
+   65 parameters: parameter .
+
+    $default  reduziere mit Regel 65 (parameters)
+
+
+Zustand 28
+
+    7 command: INT_TYPE INT_ID . '=' int_expr ';' LINEINFO
+
+    '='  schiebe und gehe zu Zustand 50 über
+
+
+Zustand 29
+
+    8 command: REAL_TYPE REAL_ID . '=' real_expr ';' LINEINFO
+
+    '='  schiebe und gehe zu Zustand 51 über
+
+
+Zustand 30
+
+    6 command: BOOL_TYPE BOOL_ID . '=' bool_expr ';' LINEINFO
+
+    '='  schiebe und gehe zu Zustand 52 über
+
+
+Zustand 31
+
+    9 command: STRING_TYPE STRING_ID . '=' string_expr ';' LINEINFO
+
+    '='  schiebe und gehe zu Zustand 53 über
+
+
+Zustand 32
+
+   16 expr: INT_ID '=' . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 59 über
+
+
+Zustand 33
+
+   17 expr: REAL_ID '=' . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 67 über
+
+
+Zustand 34
+
+   15 expr: BOOL_ID '=' . bool_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 72 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 35
+
+   18 expr: STRING_ID '=' . string_expr
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+
+    string_expr  gehe zu Zustand 77 über
+
+
+Zustand 36
+
+   10 command: COMMENT LINEINFO .
+
+    $default  reduziere mit Regel 10 (command)
+
+
+Zustand 37
+
+    0 $accept: inputfile $end .
+
+    $default  annehmen
+
+
+Zustand 38
+
+    3 inputfile: inputfile command .
+
+    $default  reduziere mit Regel 3 (inputfile)
+
+
+Zustand 39
+
+    4 command: statement LINEINFO .
+
+    $default  reduziere mit Regel 4 (command)
+
+
+Zustand 40
+
+    5 command: expr ';' . LINEINFO
+
+    LINEINFO  schiebe und gehe zu Zustand 78 über
+
+
+Zustand 41
+
+   80 parameter: BOOL_PARAMETER '=' . bool_expr
+   82          | BOOL_PARAMETER '=' . '[' bool_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+    '['         schiebe und gehe zu Zustand 79 über
+
+    bool_expr  gehe zu Zustand 80 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 42
+
+   67 parameter: REAL_PARAMETER '=' . real_expr
+   69          | REAL_PARAMETER '=' . '[' real_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+    '['         schiebe und gehe zu Zustand 81 über
+
+    real_expr  gehe zu Zustand 82 über
+
+
+Zustand 43
+
+   71 parameter: INT_PARAMETER '=' . int_expr
+   73          | INT_PARAMETER '=' . '[' int_exprs ']'
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+    '['        schiebe und gehe zu Zustand 83 über
+
+    int_expr  gehe zu Zustand 84 über
+
+
+Zustand 44
+
+   75 parameter: STRING_PARAMETER '=' . string_expr
+   77          | STRING_PARAMETER '=' . '[' string_exprs ']'
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+    '['           schiebe und gehe zu Zustand 85 über
+
+    string_expr  gehe zu Zustand 86 über
+
+
+Zustand 45
+
+   81 parameter: UD_BOOL_PARAMETER '=' . bool_expr
+   83          | UD_BOOL_PARAMETER '=' . '[' bool_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+    '['         schiebe und gehe zu Zustand 87 über
+
+    bool_expr  gehe zu Zustand 88 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 46
+
+   68 parameter: UD_REAL_PARAMETER '=' . real_expr
+   70          | UD_REAL_PARAMETER '=' . '[' real_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+    '['         schiebe und gehe zu Zustand 89 über
+
+    real_expr  gehe zu Zustand 90 über
+
+
+Zustand 47
+
+   72 parameter: UD_INT_PARAMETER '=' . int_expr
+   74          | UD_INT_PARAMETER '=' . '[' int_exprs ']'
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+    '['        schiebe und gehe zu Zustand 91 über
+
+    int_expr  gehe zu Zustand 92 über
+
+
+Zustand 48
+
+   76 parameter: UD_STRING_PARAMETER '=' . string_expr
+   79          | UD_STRING_PARAMETER '=' . '[' string_exprs ']'
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+    '['           schiebe und gehe zu Zustand 93 über
+
+    string_expr  gehe zu Zustand 94 über
+
+
+Zustand 49
+
+   66 parameters: parameters parameter .
+
+    $default  reduziere mit Regel 66 (parameters)
+
+
+Zustand 50
+
+    7 command: INT_TYPE INT_ID '=' . int_expr ';' LINEINFO
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 95 über
+
+
+Zustand 51
+
+    8 command: REAL_TYPE REAL_ID '=' . real_expr ';' LINEINFO
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 96 über
+
+
+Zustand 52
+
+    6 command: BOOL_TYPE BOOL_ID '=' . bool_expr ';' LINEINFO
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 97 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 53
+
+    9 command: STRING_TYPE STRING_ID '=' . string_expr ';' LINEINFO
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+
+    string_expr  gehe zu Zustand 98 über
+
+
+Zustand 54
+
+   34 int_expr: INT_ID .
+
+    $default  reduziere mit Regel 34 (int_expr)
+
+
+Zustand 55
+
+   33 int_expr: INT_VALUE .
+
+    $default  reduziere mit Regel 33 (int_expr)
+
+
+Zustand 56
+
+   41 int_expr: PLUS . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 99 über
+
+
+Zustand 57
+
+   40 int_expr: MINUS . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 100 über
+
+
+Zustand 58
+
+   35 int_expr: '(' . int_expr ')'
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 101 über
+
+
+Zustand 59
+
+   16 expr: INT_ID '=' int_expr .
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+
+    PLUS      schiebe und gehe zu Zustand 102 über
+    MINUS     schiebe und gehe zu Zustand 103 über
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+
+    $default  reduziere mit Regel 16 (expr)
+
+
+Zustand 60
+
+   45 real_expr: INT_ID .
+
+    $default  reduziere mit Regel 45 (real_expr)
+
+
+Zustand 61
+
+   44 real_expr: REAL_ID .
+
+    $default  reduziere mit Regel 44 (real_expr)
+
+
+Zustand 62
+
+   43 real_expr: INT_VALUE .
+
+    $default  reduziere mit Regel 43 (real_expr)
+
+
+Zustand 63
+
+   42 real_expr: REAL_VALUE .
+
+    $default  reduziere mit Regel 42 (real_expr)
+
+
+Zustand 64
+
+   52 real_expr: PLUS . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 106 über
+
+
+Zustand 65
+
+   51 real_expr: MINUS . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 107 über
+
+
+Zustand 66
+
+   46 real_expr: '(' . real_expr ')'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 108 über
+
+
+Zustand 67
+
+   17 expr: REAL_ID '=' real_expr .
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 17 (expr)
+
+
+Zustand 68
+
+   20 bool_expr: BOOL_ID .
+
+    $default  reduziere mit Regel 20 (bool_expr)
+
+
+Zustand 69
+
+   19 bool_expr: BOOL_VALUE .
+
+    $default  reduziere mit Regel 19 (bool_expr)
+
+
+Zustand 70
+
+   26 bool_expr: NOT . bool_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 113 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 71
+
+   25 bool_expr: '(' . bool_expr ')'
+   46 real_expr: '(' . real_expr ')'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 114 über
+    real_expr  gehe zu Zustand 115 über
+
+
+Zustand 72
+
+   15 expr: BOOL_ID '=' bool_expr .
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    OR   schiebe und gehe zu Zustand 118 über
+    AND  schiebe und gehe zu Zustand 119 über
+
+    $default  reduziere mit Regel 15 (expr)
+
+
+Zustand 73
+
+   27 bool_expr: real_expr . LT real_expr
+   28          | real_expr . GT real_expr
+   29          | real_expr . LE real_expr
+   30          | real_expr . GE real_expr
+   31          | real_expr . EQ real_expr
+   32          | real_expr . NE real_expr
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    GE        schiebe und gehe zu Zustand 120 über
+    GT        schiebe und gehe zu Zustand 121 über
+    LE        schiebe und gehe zu Zustand 122 über
+    LT        schiebe und gehe zu Zustand 123 über
+    EQ        schiebe und gehe zu Zustand 124 über
+    NE        schiebe und gehe zu Zustand 125 über
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+
+Zustand 74
+
+   55 string_expr: INT_ID .
+
+    $default  reduziere mit Regel 55 (string_expr)
+
+
+Zustand 75
+
+   54 string_expr: STRING_ID .
+
+    $default  reduziere mit Regel 54 (string_expr)
+
+
+Zustand 76
+
+   53 string_expr: STRING_VALUE .
+
+    $default  reduziere mit Regel 53 (string_expr)
+
+
+Zustand 77
+
+   18 expr: STRING_ID '=' string_expr .
+   56 string_expr: string_expr . PLUS string_expr
+
+    PLUS  schiebe und gehe zu Zustand 126 über
+
+    $default  reduziere mit Regel 18 (expr)
+
+
+Zustand 78
+
+    5 command: expr ';' LINEINFO .
+
+    $default  reduziere mit Regel 5 (command)
+
+
+Zustand 79
+
+   82 parameter: BOOL_PARAMETER '=' '[' . bool_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr   gehe zu Zustand 127 über
+    real_expr   gehe zu Zustand 73 über
+    bool_exprs  gehe zu Zustand 128 über
+
+
+Zustand 80
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+   80 parameter: BOOL_PARAMETER '=' bool_expr .
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    OR   schiebe und gehe zu Zustand 118 über
+    AND  schiebe und gehe zu Zustand 119 über
+
+    $default  reduziere mit Regel 80 (parameter)
+
+
+Zustand 81
+
+   69 parameter: REAL_PARAMETER '=' '[' . real_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr   gehe zu Zustand 129 über
+    real_exprs  gehe zu Zustand 130 über
+
+
+Zustand 82
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+   67 parameter: REAL_PARAMETER '=' real_expr .
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 67 (parameter)
+
+
+Zustand 83
+
+   73 parameter: INT_PARAMETER '=' '[' . int_exprs ']'
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr   gehe zu Zustand 131 über
+    int_exprs  gehe zu Zustand 132 über
+
+
+Zustand 84
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+   71 parameter: INT_PARAMETER '=' int_expr .
+
+    PLUS      schiebe und gehe zu Zustand 102 über
+    MINUS     schiebe und gehe zu Zustand 103 über
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+
+    $default  reduziere mit Regel 71 (parameter)
+
+
+Zustand 85
+
+   77 parameter: STRING_PARAMETER '=' '[' . string_exprs ']'
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+
+    string_expr   gehe zu Zustand 133 über
+    string_exprs  gehe zu Zustand 134 über
+
+
+Zustand 86
+
+   56 string_expr: string_expr . PLUS string_expr
+   75 parameter: STRING_PARAMETER '=' string_expr .
+
+    PLUS  schiebe und gehe zu Zustand 126 über
+
+    $default  reduziere mit Regel 75 (parameter)
+
+
+Zustand 87
+
+   83 parameter: UD_BOOL_PARAMETER '=' '[' . bool_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr   gehe zu Zustand 127 über
+    real_expr   gehe zu Zustand 73 über
+    bool_exprs  gehe zu Zustand 135 über
+
+
+Zustand 88
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+   81 parameter: UD_BOOL_PARAMETER '=' bool_expr .
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    OR   schiebe und gehe zu Zustand 118 über
+    AND  schiebe und gehe zu Zustand 119 über
+
+    $default  reduziere mit Regel 81 (parameter)
+
+
+Zustand 89
+
+   70 parameter: UD_REAL_PARAMETER '=' '[' . real_exprs ']'
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr   gehe zu Zustand 129 über
+    real_exprs  gehe zu Zustand 136 über
+
+
+Zustand 90
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+   68 parameter: UD_REAL_PARAMETER '=' real_expr .
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 68 (parameter)
+
+
+Zustand 91
+
+   74 parameter: UD_INT_PARAMETER '=' '[' . int_exprs ']'
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr   gehe zu Zustand 131 über
+    int_exprs  gehe zu Zustand 137 über
+
+
+Zustand 92
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+   72 parameter: UD_INT_PARAMETER '=' int_expr .
+
+    PLUS      schiebe und gehe zu Zustand 102 über
+    MINUS     schiebe und gehe zu Zustand 103 über
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+
+    $default  reduziere mit Regel 72 (parameter)
+
+
+Zustand 93
+
+   79 parameter: UD_STRING_PARAMETER '=' '[' . string_exprs ']'
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+
+    string_expr   gehe zu Zustand 133 über
+    string_exprs  gehe zu Zustand 138 über
+
+
+Zustand 94
+
+   56 string_expr: string_expr . PLUS string_expr
+   76 parameter: UD_STRING_PARAMETER '=' string_expr .
+
+    PLUS  schiebe und gehe zu Zustand 126 über
+
+    $default  reduziere mit Regel 76 (parameter)
+
+
+Zustand 95
+
+    7 command: INT_TYPE INT_ID '=' int_expr . ';' LINEINFO
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+
+    PLUS      schiebe und gehe zu Zustand 102 über
+    MINUS     schiebe und gehe zu Zustand 103 über
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+    ';'       schiebe und gehe zu Zustand 139 über
+
+
+Zustand 96
+
+    8 command: REAL_TYPE REAL_ID '=' real_expr . ';' LINEINFO
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+    ';'       schiebe und gehe zu Zustand 140 über
+
+
+Zustand 97
+
+    6 command: BOOL_TYPE BOOL_ID '=' bool_expr . ';' LINEINFO
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    OR   schiebe und gehe zu Zustand 118 über
+    AND  schiebe und gehe zu Zustand 119 über
+    ';'  schiebe und gehe zu Zustand 141 über
+
+
+Zustand 98
+
+    9 command: STRING_TYPE STRING_ID '=' string_expr . ';' LINEINFO
+   56 string_expr: string_expr . PLUS string_expr
+
+    PLUS  schiebe und gehe zu Zustand 126 über
+    ';'   schiebe und gehe zu Zustand 142 über
+
+
+Zustand 99
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+   41         | PLUS int_expr .
+
+    $default  reduziere mit Regel 41 (int_expr)
+
+
+Zustand 100
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+   40         | MINUS int_expr .
+
+    $default  reduziere mit Regel 40 (int_expr)
+
+
+Zustand 101
+
+   35 int_expr: '(' int_expr . ')'
+   36         | int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+
+    PLUS      schiebe und gehe zu Zustand 102 über
+    MINUS     schiebe und gehe zu Zustand 103 über
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+    ')'       schiebe und gehe zu Zustand 143 über
+
+
+Zustand 102
+
+   36 int_expr: int_expr PLUS . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 144 über
+
+
+Zustand 103
+
+   37 int_expr: int_expr MINUS . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 145 über
+
+
+Zustand 104
+
+   38 int_expr: int_expr ASTERISK . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 146 über
+
+
+Zustand 105
+
+   39 int_expr: int_expr DIVIDE . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 147 über
+
+
+Zustand 106
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+   52          | PLUS real_expr .
+
+    $default  reduziere mit Regel 52 (real_expr)
+
+
+Zustand 107
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+   51          | MINUS real_expr .
+
+    $default  reduziere mit Regel 51 (real_expr)
+
+
+Zustand 108
+
+   46 real_expr: '(' real_expr . ')'
+   47          | real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+    ')'       schiebe und gehe zu Zustand 148 über
+
+
+Zustand 109
+
+   47 real_expr: real_expr PLUS . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 149 über
+
+
+Zustand 110
+
+   48 real_expr: real_expr MINUS . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 150 über
+
+
+Zustand 111
+
+   49 real_expr: real_expr ASTERISK . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 151 über
+
+
+Zustand 112
+
+   50 real_expr: real_expr DIVIDE . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 152 über
+
+
+Zustand 113
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+   26          | NOT bool_expr .
+
+    $default  reduziere mit Regel 26 (bool_expr)
+
+
+Zustand 114
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+   25          | '(' bool_expr . ')'
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    OR   schiebe und gehe zu Zustand 118 über
+    AND  schiebe und gehe zu Zustand 119 über
+    ')'  schiebe und gehe zu Zustand 153 über
+
+
+Zustand 115
+
+   27 bool_expr: real_expr . LT real_expr
+   28          | real_expr . GT real_expr
+   29          | real_expr . LE real_expr
+   30          | real_expr . GE real_expr
+   31          | real_expr . EQ real_expr
+   32          | real_expr . NE real_expr
+   46 real_expr: '(' real_expr . ')'
+   47          | real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    GE        schiebe und gehe zu Zustand 120 über
+    GT        schiebe und gehe zu Zustand 121 über
+    LE        schiebe und gehe zu Zustand 122 über
+    LT        schiebe und gehe zu Zustand 123 über
+    EQ        schiebe und gehe zu Zustand 124 über
+    NE        schiebe und gehe zu Zustand 125 über
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+    ')'       schiebe und gehe zu Zustand 148 über
+
+
+Zustand 116
+
+   23 bool_expr: bool_expr EQ . bool_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 154 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 117
+
+   24 bool_expr: bool_expr NE . bool_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 155 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 118
+
+   22 bool_expr: bool_expr OR . bool_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 156 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 119
+
+   21 bool_expr: bool_expr AND . bool_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 157 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 120
+
+   30 bool_expr: real_expr GE . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 158 über
+
+
+Zustand 121
+
+   28 bool_expr: real_expr GT . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 159 über
+
+
+Zustand 122
+
+   29 bool_expr: real_expr LE . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 160 über
+
+
+Zustand 123
+
+   27 bool_expr: real_expr LT . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 161 über
+
+
+Zustand 124
+
+   31 bool_expr: real_expr EQ . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 162 über
+
+
+Zustand 125
+
+   32 bool_expr: real_expr NE . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 163 über
+
+
+Zustand 126
+
+   56 string_expr: string_expr PLUS . string_expr
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+
+    string_expr  gehe zu Zustand 164 über
+
+
+Zustand 127
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+   57 bool_exprs: bool_expr .
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    OR   schiebe und gehe zu Zustand 118 über
+    AND  schiebe und gehe zu Zustand 119 über
+
+    $default  reduziere mit Regel 57 (bool_exprs)
+
+
+Zustand 128
+
+   58 bool_exprs: bool_exprs . ',' bool_expr
+   82 parameter: BOOL_PARAMETER '=' '[' bool_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 165 über
+    ']'  schiebe und gehe zu Zustand 166 über
+
+
+Zustand 129
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+   59 real_exprs: real_expr .
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 59 (real_exprs)
+
+
+Zustand 130
+
+   60 real_exprs: real_exprs . ',' real_expr
+   69 parameter: REAL_PARAMETER '=' '[' real_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 167 über
+    ']'  schiebe und gehe zu Zustand 168 über
+
+
+Zustand 131
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+   61 int_exprs: int_expr .
+
+    PLUS      schiebe und gehe zu Zustand 102 über
+    MINUS     schiebe und gehe zu Zustand 103 über
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+
+    $default  reduziere mit Regel 61 (int_exprs)
+
+
+Zustand 132
+
+   62 int_exprs: int_exprs . ',' int_expr
+   73 parameter: INT_PARAMETER '=' '[' int_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 169 über
+    ']'  schiebe und gehe zu Zustand 170 über
+
+
+Zustand 133
+
+   56 string_expr: string_expr . PLUS string_expr
+   63 string_exprs: string_expr .
+
+    PLUS  schiebe und gehe zu Zustand 126 über
+
+    $default  reduziere mit Regel 63 (string_exprs)
+
+
+Zustand 134
+
+   64 string_exprs: string_exprs . ',' string_expr
+   77 parameter: STRING_PARAMETER '=' '[' string_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 171 über
+    ']'  schiebe und gehe zu Zustand 172 über
+
+
+Zustand 135
+
+   58 bool_exprs: bool_exprs . ',' bool_expr
+   83 parameter: UD_BOOL_PARAMETER '=' '[' bool_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 165 über
+    ']'  schiebe und gehe zu Zustand 173 über
+
+
+Zustand 136
+
+   60 real_exprs: real_exprs . ',' real_expr
+   70 parameter: UD_REAL_PARAMETER '=' '[' real_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 167 über
+    ']'  schiebe und gehe zu Zustand 174 über
+
+
+Zustand 137
+
+   62 int_exprs: int_exprs . ',' int_expr
+   74 parameter: UD_INT_PARAMETER '=' '[' int_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 169 über
+    ']'  schiebe und gehe zu Zustand 175 über
+
+
+Zustand 138
+
+   64 string_exprs: string_exprs . ',' string_expr
+   79 parameter: UD_STRING_PARAMETER '=' '[' string_exprs . ']'
+
+    ','  schiebe und gehe zu Zustand 171 über
+    ']'  schiebe und gehe zu Zustand 176 über
+
+
+Zustand 139
+
+    7 command: INT_TYPE INT_ID '=' int_expr ';' . LINEINFO
+
+    LINEINFO  schiebe und gehe zu Zustand 177 über
+
+
+Zustand 140
+
+    8 command: REAL_TYPE REAL_ID '=' real_expr ';' . LINEINFO
+
+    LINEINFO  schiebe und gehe zu Zustand 178 über
+
+
+Zustand 141
+
+    6 command: BOOL_TYPE BOOL_ID '=' bool_expr ';' . LINEINFO
+
+    LINEINFO  schiebe und gehe zu Zustand 179 über
+
+
+Zustand 142
+
+    9 command: STRING_TYPE STRING_ID '=' string_expr ';' . LINEINFO
+
+    LINEINFO  schiebe und gehe zu Zustand 180 über
+
+
+Zustand 143
+
+   35 int_expr: '(' int_expr ')' .
+
+    $default  reduziere mit Regel 35 (int_expr)
+
+
+Zustand 144
+
+   36 int_expr: int_expr . PLUS int_expr
+   36         | int_expr PLUS int_expr .
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+
+    $default  reduziere mit Regel 36 (int_expr)
+
+
+Zustand 145
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   37         | int_expr MINUS int_expr .
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+
+    $default  reduziere mit Regel 37 (int_expr)
+
+
+Zustand 146
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   38         | int_expr ASTERISK int_expr .
+   39         | int_expr . DIVIDE int_expr
+
+    $default  reduziere mit Regel 38 (int_expr)
+
+
+Zustand 147
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+   39         | int_expr DIVIDE int_expr .
+
+    $default  reduziere mit Regel 39 (int_expr)
+
+
+Zustand 148
+
+   46 real_expr: '(' real_expr ')' .
+
+    $default  reduziere mit Regel 46 (real_expr)
+
+
+Zustand 149
+
+   47 real_expr: real_expr . PLUS real_expr
+   47          | real_expr PLUS real_expr .
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 47 (real_expr)
+
+
+Zustand 150
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   48          | real_expr MINUS real_expr .
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 48 (real_expr)
+
+
+Zustand 151
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   49          | real_expr ASTERISK real_expr .
+   50          | real_expr . DIVIDE real_expr
+
+    $default  reduziere mit Regel 49 (real_expr)
+
+
+Zustand 152
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+   50          | real_expr DIVIDE real_expr .
+
+    $default  reduziere mit Regel 50 (real_expr)
+
+
+Zustand 153
+
+   25 bool_expr: '(' bool_expr ')' .
+
+    $default  reduziere mit Regel 25 (bool_expr)
+
+
+Zustand 154
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   23          | bool_expr EQ bool_expr .
+   24          | bool_expr . NE bool_expr
+
+    $default  reduziere mit Regel 23 (bool_expr)
+
+
+Zustand 155
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+   24          | bool_expr NE bool_expr .
+
+    $default  reduziere mit Regel 24 (bool_expr)
+
+
+Zustand 156
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   22          | bool_expr OR bool_expr .
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    AND  schiebe und gehe zu Zustand 119 über
+
+    $default  reduziere mit Regel 22 (bool_expr)
+
+
+Zustand 157
+
+   21 bool_expr: bool_expr . AND bool_expr
+   21          | bool_expr AND bool_expr .
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+
+    EQ  schiebe und gehe zu Zustand 116 über
+    NE  schiebe und gehe zu Zustand 117 über
+
+    $default  reduziere mit Regel 21 (bool_expr)
+
+
+Zustand 158
+
+   30 bool_expr: real_expr GE real_expr .
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 30 (bool_expr)
+
+
+Zustand 159
+
+   28 bool_expr: real_expr GT real_expr .
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 28 (bool_expr)
+
+
+Zustand 160
+
+   29 bool_expr: real_expr LE real_expr .
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 29 (bool_expr)
+
+
+Zustand 161
+
+   27 bool_expr: real_expr LT real_expr .
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 27 (bool_expr)
+
+
+Zustand 162
+
+   31 bool_expr: real_expr EQ real_expr .
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 31 (bool_expr)
+
+
+Zustand 163
+
+   32 bool_expr: real_expr NE real_expr .
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 32 (bool_expr)
+
+
+Zustand 164
+
+   56 string_expr: string_expr . PLUS string_expr
+   56            | string_expr PLUS string_expr .
+
+    $default  reduziere mit Regel 56 (string_expr)
+
+
+Zustand 165
+
+   58 bool_exprs: bool_exprs ',' . bool_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    BOOL_ID     schiebe und gehe zu Zustand 68 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    BOOL_VALUE  schiebe und gehe zu Zustand 69 über
+    NOT         schiebe und gehe zu Zustand 70 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 71 über
+
+    bool_expr  gehe zu Zustand 181 über
+    real_expr  gehe zu Zustand 73 über
+
+
+Zustand 166
+
+   82 parameter: BOOL_PARAMETER '=' '[' bool_exprs ']' .
+
+    $default  reduziere mit Regel 82 (parameter)
+
+
+Zustand 167
+
+   60 real_exprs: real_exprs ',' . real_expr
+
+    INT_ID      schiebe und gehe zu Zustand 60 über
+    REAL_ID     schiebe und gehe zu Zustand 61 über
+    INT_VALUE   schiebe und gehe zu Zustand 62 über
+    REAL_VALUE  schiebe und gehe zu Zustand 63 über
+    PLUS        schiebe und gehe zu Zustand 64 über
+    MINUS       schiebe und gehe zu Zustand 65 über
+    '('         schiebe und gehe zu Zustand 66 über
+
+    real_expr  gehe zu Zustand 182 über
+
+
+Zustand 168
+
+   69 parameter: REAL_PARAMETER '=' '[' real_exprs ']' .
+
+    $default  reduziere mit Regel 69 (parameter)
+
+
+Zustand 169
+
+   62 int_exprs: int_exprs ',' . int_expr
+
+    INT_ID     schiebe und gehe zu Zustand 54 über
+    INT_VALUE  schiebe und gehe zu Zustand 55 über
+    PLUS       schiebe und gehe zu Zustand 56 über
+    MINUS      schiebe und gehe zu Zustand 57 über
+    '('        schiebe und gehe zu Zustand 58 über
+
+    int_expr  gehe zu Zustand 183 über
+
+
+Zustand 170
+
+   73 parameter: INT_PARAMETER '=' '[' int_exprs ']' .
+
+    $default  reduziere mit Regel 73 (parameter)
+
+
+Zustand 171
+
+   64 string_exprs: string_exprs ',' . string_expr
+
+    INT_ID        schiebe und gehe zu Zustand 74 über
+    STRING_ID     schiebe und gehe zu Zustand 75 über
+    STRING_VALUE  schiebe und gehe zu Zustand 76 über
+
+    string_expr  gehe zu Zustand 184 über
+
+
+Zustand 172
+
+   77 parameter: STRING_PARAMETER '=' '[' string_exprs ']' .
+
+    $default  reduziere mit Regel 77 (parameter)
+
+
+Zustand 173
+
+   83 parameter: UD_BOOL_PARAMETER '=' '[' bool_exprs ']' .
+
+    $default  reduziere mit Regel 83 (parameter)
+
+
+Zustand 174
+
+   70 parameter: UD_REAL_PARAMETER '=' '[' real_exprs ']' .
+
+    $default  reduziere mit Regel 70 (parameter)
+
+
+Zustand 175
+
+   74 parameter: UD_INT_PARAMETER '=' '[' int_exprs ']' .
+
+    $default  reduziere mit Regel 74 (parameter)
+
+
+Zustand 176
+
+   79 parameter: UD_STRING_PARAMETER '=' '[' string_exprs ']' .
+
+    $default  reduziere mit Regel 79 (parameter)
+
+
+Zustand 177
+
+    7 command: INT_TYPE INT_ID '=' int_expr ';' LINEINFO .
+
+    $default  reduziere mit Regel 7 (command)
+
+
+Zustand 178
+
+    8 command: REAL_TYPE REAL_ID '=' real_expr ';' LINEINFO .
+
+    $default  reduziere mit Regel 8 (command)
+
+
+Zustand 179
+
+    6 command: BOOL_TYPE BOOL_ID '=' bool_expr ';' LINEINFO .
+
+    $default  reduziere mit Regel 6 (command)
+
+
+Zustand 180
+
+    9 command: STRING_TYPE STRING_ID '=' string_expr ';' LINEINFO .
+
+    $default  reduziere mit Regel 9 (command)
+
+
+Zustand 181
+
+   21 bool_expr: bool_expr . AND bool_expr
+   22          | bool_expr . OR bool_expr
+   23          | bool_expr . EQ bool_expr
+   24          | bool_expr . NE bool_expr
+   58 bool_exprs: bool_exprs ',' bool_expr .
+
+    EQ   schiebe und gehe zu Zustand 116 über
+    NE   schiebe und gehe zu Zustand 117 über
+    OR   schiebe und gehe zu Zustand 118 über
+    AND  schiebe und gehe zu Zustand 119 über
+
+    $default  reduziere mit Regel 58 (bool_exprs)
+
+
+Zustand 182
+
+   47 real_expr: real_expr . PLUS real_expr
+   48          | real_expr . MINUS real_expr
+   49          | real_expr . ASTERISK real_expr
+   50          | real_expr . DIVIDE real_expr
+   60 real_exprs: real_exprs ',' real_expr .
+
+    PLUS      schiebe und gehe zu Zustand 109 über
+    MINUS     schiebe und gehe zu Zustand 110 über
+    ASTERISK  schiebe und gehe zu Zustand 111 über
+    DIVIDE    schiebe und gehe zu Zustand 112 über
+
+    $default  reduziere mit Regel 60 (real_exprs)
+
+
+Zustand 183
+
+   36 int_expr: int_expr . PLUS int_expr
+   37         | int_expr . MINUS int_expr
+   38         | int_expr . ASTERISK int_expr
+   39         | int_expr . DIVIDE int_expr
+   62 int_exprs: int_exprs ',' int_expr .
+
+    PLUS      schiebe und gehe zu Zustand 102 über
+    MINUS     schiebe und gehe zu Zustand 103 über
+    ASTERISK  schiebe und gehe zu Zustand 104 über
+    DIVIDE    schiebe und gehe zu Zustand 105 über
+
+    $default  reduziere mit Regel 62 (int_exprs)
+
+
+Zustand 184
+
+   56 string_expr: string_expr . PLUS string_expr
+   64 string_exprs: string_exprs ',' string_expr .
+
+    PLUS  schiebe und gehe zu Zustand 126 über
+
+    $default  reduziere mit Regel 64 (string_exprs)

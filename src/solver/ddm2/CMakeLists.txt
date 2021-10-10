@@ -1,0 +1,34 @@
+
+SET (CXX_SRCS
+ddm2_boundary_ei_interface.cc
+ddm2_boundary_ev.cc
+ddm2_boundary_float_metal.cc
+ddm2_boundary_gate.cc
+ddm2_boundary_hetero_interface.cc
+ddm2_boundary_homo_interface.cc
+ddm2_boundary_ii_interface.cc
+ddm2_boundary_ir_interface.cc
+ddm2_boundary_is_interface.cc
+ddm2_boundary_iv.cc
+ddm2_boundary_neumann.cc
+ddm2_boundary_ohmic.cc
+ddm2_boundary_resistance_ohmic.cc
+ddm2_boundary_resistance_schottky.cc
+ddm2_boundary_rr_interface.cc
+ddm2_boundary_schottky.cc
+ddm2_boundary_simple_gate.cc
+ddm2_boundary_solderpad.cc
+ddm2.cc
+ddm2_conductor.cc
+ddm2_conductor_hanging_node.cc
+ddm2_insulator.cc
+ddm2_insulator_hanging_node.cc
+ddm2_resistance.cc
+ddm2_resistance_hanging_node.cc
+ddm2_semiconductor.cc
+ddm2_semiconductor_hanging_node.cc
+)
+
+INCLUDE_DIRECTORIES(${MXML_INCLUDE})
+ADD_LIBRARY(solver_ddm2 ${CXX_SRCS})
+

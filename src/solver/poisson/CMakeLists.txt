@@ -1,0 +1,31 @@
+
+SET (CXX_SRCS
+poisson_boundary_ei_interface.cc
+poisson_boundary_float_metal.cc
+poisson_boundary_gate.cc
+poisson_boundary_hetero_interface.cc
+poisson_boundary_homo_interface.cc
+poisson_boundary_ii_interface.cc
+poisson_boundary_ir_interface.cc
+poisson_boundary_is_interface.cc
+poisson_boundary_ohmic.cc
+poisson_boundary_resistance_ohmic.cc
+poisson_boundary_resistance_schottky.cc
+poisson_boundary_rr_interface.cc
+poisson_boundary_schottky.cc
+poisson_boundary_simple_gate.cc
+poisson_boundary_solderpad.cc
+poisson.cc
+poisson_conductor.cc
+poisson_conductor_hanging_node.cc
+poisson_insulator.cc
+poisson_insulator_hanging_node.cc
+poisson_resistance.cc
+poisson_resistance_hanging_node.cc
+poisson_semiconductor.cc
+poisson_semiconductor_hanging_node.cc
+)
+
+INCLUDE_DIRECTORIES(${MXML_INCLUDE} ${EXPREVAL_INCLUDE})
+ADD_LIBRARY(solver_poisson ${CXX_SRCS})
+

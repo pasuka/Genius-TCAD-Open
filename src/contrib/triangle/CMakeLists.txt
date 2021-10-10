@@ -1,0 +1,10 @@
+
+SET (CXX_SRCS
+triangle.c
+)
+ADD_DEFINITIONS(-DTRILIBRARY)
+
+ADD_LIBRARY(triangle ${CXX_SRCS})
+
+
+

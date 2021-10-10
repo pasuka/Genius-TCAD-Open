@@ -1,0 +1,50 @@
+Successfully compiles on Ubuntu 12.04 using cmake instead of waf
+packages required:
+sudo apt-get install libcgns2 libcgns-dev libvtk5-dev cmake cgns-convert libcgns-dev libcgns2
+
+export INSTALLDIR=/home/lutherthecat/external
+mkdir -p $INSTALLDIR/lib
+mkdir -p $INSTALLDIR/include
+cd $INSTALLDIR
+
+petsc:
+wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.1-p8.tar.gz
+
+tar xzvf petsc-3.1-p8.tar.gz
+cd petsc-3.1-p8
+
+./configure --with-mpi=0 \
+  --with-debugging=0 --with-shared=0 --with-x=0 --with-pic=1 \
+  --download-f-blas-lapack=1 \
+  --download-metis=1 \
+  --download-superlu=1 \
+  --COPTFLAGS="-O2" --CXXOPTFLAGS="-O2" --FOPTFLAGS="-O2" \
+  --prefix=$INSTALLDIR
+
+Then follow the given setting PETSC_DIR and make instruction:
+make PETSC_DIR=/home/lutherthecat/external/petsc-3.1-p8 PETSC_ARCH=linux-gnu-c-opt all
+make PETSC_DIR=/home/lutherthecat/external/petsc-3.1-p8 PETSC_ARCH=linux-gnu-c-opt install
+export PETSC_DIR=/home/lutherthecat/external
+
+
+
+compile genius:
+mkdir cmake
+cd cmake
+cmake -Wno-dev -DPETSC_DIR=$PETSC_DIR -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpicxx ../ # use DEBUG for debugging symbols
+make brkpnts # make necessary header file
+make -j2 # n is the number of processors for parallel build
+
+
+Start using Genius
+export GENIUS_DIR=/home/lutherthecat/Genius-TCAD-Open
+cd examples/PN_Diode/2D
+$GENIUS_DIR/bin/genius -i pn2d.inp
+
+It may be helpful to get the cgnstools online.
+Use the hdf2adf command (cgns-convert package) to create an adf version of the files and compile the cgnstools yourself from:
+http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/cgnstools/index.html
+hdf2adf nmos_tri.cgns nmos.cgns
+~/cgnstools/bin/cgnsview nmos.cgns
+
+

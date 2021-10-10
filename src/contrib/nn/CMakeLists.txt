@@ -1,0 +1,12 @@
+
+SET (CXX_SRCS
+delaunay.cc
+istack.cc
+lpi.cc
+)
+
+INCLUDE_DIRECTORIES(${TRIANGLE_INCLUDE})
+ADD_LIBRARY(nn ${CXX_SRCS})
+
+
+
