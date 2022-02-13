@@ -396,7 +396,68 @@ potential_damping_end:
  */
 void DDM1Solver::bank_rose_damping(Vec x, Vec y, Vec w, PetscBool *changed_y, PetscBool *changed_w)
 {
-  return;
+	START_LOG("DDM1Solver_bank_rose_damping()", "DDM1Solver");
+
+	//std::cout << "DDM1Solver::bank_rose_damping, ddm1.cc line " << __LINE__ << std::endl;
+
+	int it,j=0;
+	PetscScalar    *xx;
+	PetscScalar    *yy;
+	PetscScalar    *ww;
+
+	VecGetArray(x, &xx);  // previous iterate value
+	VecGetArray(y, &yy);  // new search direction and length
+	VecGetArray(w, &ww);  // current candidate iterate
+
+	SNESGetIterationNumber(snes,&it);
+	std::cout << "Nonlinear interation number " << it << " ; bank_rose_j = " << bank_rose_j << std::endl;
+	static PetscScalar K;
+#pragma omp threadprivate(K)
+	if(it==0) K=0;
+
+	Vec gk0,gk1;
+	int flag=0;
+	VecDuplicate(x,&gk0);
+	VecDuplicate(x,&gk1);
+	SNESComputeFunction(snes,x,gk0);
+	PetscScalar gk0_norm;
+	VecNorm(gk0,NORM_2,&gk0_norm);
+	while(1)
+	{
+		PetscScalar tk=1.0/(1+K*gk0_norm);    // (4)
+		if(tk<1e-4) break;
+		//w=x-tk*y;
+		flag=1;
+		VecWAXPY(w,-tk,y,x);                  // u_{k+1}
+		std::cout << "DDM1Solver::bank_rose_damping function evaluation; K = " << K << std::endl;
+		SNESComputeFunction(snes,w,gk1);      // g_{k+1}
+		PetscScalar gk1_norm;
+		VecNorm(gk1,NORM_2,&gk1_norm);        // ||g_{k+1}||
+		if((1-gk1_norm/gk0_norm)<0.9*tk)      // (6)
+		{	                                  // (7)
+			if(K==0) K=1;
+			else K*=10;
+		}
+		else                                  // (8)
+		{
+			K*= pow(4,bank_rose_j-it-1); // 5;
+			bank_rose_j = it;
+			break;
+		}
+	}
+
+	VecRestoreArray(x, &xx);
+	//VecRestoreArray(y, &yy);
+	VecRestoreArray(w, &ww);
+
+	VecDestroy(&gk0);
+	VecDestroy(&gk1);
+
+	*changed_y = PETSC_FALSE;
+	*changed_w = PETSC_TRUE;
+	STOP_LOG("DDM1Solver_bank_rose_damping()", "DDM1Solver");
+
+	return;
 }
 
 

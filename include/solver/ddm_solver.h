@@ -361,6 +361,11 @@ protected:
    */
   PetscInt nonlinear_iteration;
 
+  /**
+   * nonlinear iteration since last divergence
+   */
+  PetscInt bank_rose_j;
+
 };
 
 #endif //#define __ddm_solver_h__

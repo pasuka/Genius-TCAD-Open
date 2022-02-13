@@ -38,8 +38,7 @@ public:
   {system.record_active_solver(this->solver_type());}
 
 
-  ~DDM1Solver()
-  {}
+  ~DDM1Solver(){}
 
   /**
    * @return the solver type
@@ -202,6 +201,7 @@ public:
     switch( SolverSpecify::Damping )
     {
       case SolverSpecify::DampingPotential      : potential_damping(x, y, w, changed_y, changed_w); break;
+      case SolverSpecify::DampingBankRose       : bank_rose_damping(x, y, w, changed_y, changed_w); break;
       default: check_positive_density(x, y, w, changed_y, changed_w);
     }
   
