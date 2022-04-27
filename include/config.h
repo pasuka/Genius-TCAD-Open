@@ -1,0 +1,46 @@
+/* WARNING! All changes made to this file will be lost! */
+
+#ifndef _CONFIG_H_WAF
+#define _CONFIG_H_WAF
+
+#define LINUX 1
+#define DLLHOOK 1
+#define SIZEOF_DOUBLE 8
+#define SIZEOF_FLOAT 4
+#define SIZEOF_INT 4
+#define SIZEOF_LONG_INT 8
+#define SIZEOF_LONG_LONG_INT 8
+#define SIZEOF_SHORT_INT 2
+#define SIZEOF_VOID_P 8
+#define HAVE_FCNTL_H 1
+#define HAVE_FLOAT_H 1
+#define HAVE_FENV_H 1
+#define HAVE_LIMITS_H 1
+#define HAVE_STDDEF_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_STDIO_H 1
+#define HAVE_ASSERT_H 1
+#define HAVE_SYS_TIME_H 1
+#define HAVE_SYS_TYPES_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_MEMORY_H 1
+#define HAVE_STRINGS_H 1
+#define HAVE_INTTYPES_H 1
+#define HAVE_STDINT_H 1
+#define HAVE_UNISTD_H 1
+#define HAVE_TR1_UNORDERED_MAP 1
+#define HAVE_TR1_UNORDERED_SET 1
+#define HAVE_TR1_UNORDERED_MAP_WITH_STD_HEADER 1
+#define HAVE_TR1_UNORDERED_SET_WITH_STD_HEADER 1
+#define HAVE_STD_LIMITS 1
+#define HAVE_NAMESPACES 1
+#define HAVE_SSTREAM 1
+#define HAVE_PETSC 1
+#define WITH_PETSCSCALAR_DOUBLE 1
+#define HAVE_CGNSLIB_H 1
+#define HAVE_CGNS 1
+#define HAVE_VTKCONFIGURE_H 1
+#define HAVE_VTK 1
+
+#endif /* _CONFIG_H_WAF */
