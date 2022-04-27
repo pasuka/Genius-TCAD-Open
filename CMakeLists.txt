@@ -1,12 +1,27 @@
 PROJECT(GENIUS)
+#set(CMAKE_VERBOSE_MAKEFILE on)
+
+message(${CMAKE_SYSTEM_PROCESSOR})
+
+cmake_host_system_information(RESULT PRETTY_NAME QUERY PROCESSOR_NAME)
+message(STATUS "${PRETTY_NAME}")
+
+cmake_host_system_information(RESULT PRETTY_NAME QUERY PROCESSOR_DESCRIPTION)
+message(STATUS "${PRETTY_NAME}")
+
+message(${CMAKE_SHARED_LIBRARY_SUFFIX})
+
 SET(INCLUDE_BASE ${CMAKE_SOURCE_DIR}/include)
-SET(PETSC_INCLUDE ${PETSC_DIR}/include)
-SET(PETSC_ARCHIVE -L${PETSC_DIR}/lib -lpetsc)
+SET(PETSC_INCLUDE $ENV{PETSC_DIR}/$ENV{PETSC_ARCH}/include)
+SET(PETSC_ARCHIVE -L$ENV{PETSC_DIR}/$ENV{PETSC_ARCH}/lib -lpetsc)
+
 SET(BLAS_ARCHIVE /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.so /opt/intel/mkl/lib/intel64/libmkl_gnu_thread.so /opt/intel/mkl/lib/intel64/libmkl_core.so)
 SET(LAPACK_ARCHIVE /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.so /opt/intel/mkl/lib/intel64/libmkl_gnu_thread.so /opt/intel/mkl/lib/intel64/libmkl_core.so)
+
 #SET(SUPERLU_ARCHIVE ${PETSC_DIR}/lib/libsuperlu_4.0.a)
-SET(MPI_INCLUDE /opt/intel/compilers_and_libraries_2019.0.117/linux/mpi/intel64/include) #${PETSC_DIR}/include/mpiuni)
+SET(MPI_INCLUDE /opt/intel/oneapi/mpi/latest/include/) #${PETSC_DIR}/include/mpiuni)
 SET(MPI_ARCHIVE -L/opt/intel/compilers_and_libraries_2019.0.117/linux/mpi/intel64/lib/release -L/opt/intel/compilers_and_libraries_2019.0.117/linux/mpi/intel64/lib -lmpifort -lmpicxx -lmpi -lrt)
+
 SET(MXML_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/mxml)
 SET(TREX_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/trex)
 SET(SPICE_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/spice)
@@ -21,16 +36,21 @@ SET(STANFORD_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/stanford)
 SET(TIF3D_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/tif3d)
 SET(TIF_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/tif)
 SET(SPLINE_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/spline)
+
+SET(HAVE_VTK 1)
 SET(VTK_INCLUDE /usr/local/include/vtk-5.8)
 SET(VTK_ARCHIVE -L/usr/local/lib/vtk-5.8 -lvtkIO -lvtkFiltering -lvtkCommon -lmetis)
+
 SET(FLEX /usr/bin/flex)
 SET(BISON /usr/bin/bison)
-SET(HAVE_VTK 1)
 #SET(CGNS_INCLUDE ${PETSC_DIR}/include)
 #SET(CGNS_ARCHIVE ${PETSC_DIR}/lib/libcgns.so)
 SET(CGNS_INCLUDE /usr/bin/include)
 SET(CGNS_ARCHIVE -lcgns)
-INCLUDE_DIRECTORIES(${PETSC_INCLUDE} ${MPI_INCLUDE}
+
+INCLUDE_DIRECTORIES(
+${PETSC_INCLUDE}
+${MPI_INCLUDE}
 ${INCLUDE_BASE}
 ${INCLUDE_BASE}/base
 ${INCLUDE_BASE}/bc

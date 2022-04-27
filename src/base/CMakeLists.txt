@@ -7,5 +7,5 @@ memory_log.cc
 perf_log.cc
 )
 
-ADD_LIBRARY(base ${CXX_SRCS})
+ADD_LIBRARY(base SHARED ${CXX_SRCS})
 
