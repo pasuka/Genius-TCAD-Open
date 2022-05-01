@@ -5,7 +5,7 @@ cgns_hook.cc
 cv_hook.cc
 data_hook.cc
 ddm_monitor_hook.cc
-dlhook.cc
+#dlhook.cc
 eigenvalue_hook.cc
 gnuplot_hook.cc
 #gummel_monitor_hook
@@ -31,5 +31,12 @@ ADD_DEFINITIONS(-DHAVE_VTK)
 ENDIF(${HAVE_VTK})
 
 INCLUDE_DIRECTORIES(${MXML_INCLUDE} ${SPICE_INCLUDE} ${KDTREE_INCLUDE} ${VTK_INCLUDE})
-ADD_LIBRARY(hook ${CXX_SRCS})
+FOREACH(LIB ${CXX_SRCS})
+	get_filename_component(LIBNAME ${LIB} NAME_WE)
+	ADD_LIBRARY(${LIBNAME} SHARED ${LIB})
+	ADD_CUSTOM_COMMAND(TARGET ${LIBNAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LIBNAME}> ${CMAKE_SOURCE_DIR}/lib/${LIBNAME}.so)
+ENDFOREACH(LIB ${CXX_SRCS})
+
+ADD_LIBRARY(hook dlhook.cc)
 
