@@ -19,6 +19,7 @@ NPolySi
 PolySi
 PPolySi
 Si
+SiC4H
 SiO2
 W
 )
