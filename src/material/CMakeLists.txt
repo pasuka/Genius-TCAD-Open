@@ -7,6 +7,7 @@ PMI.cc
 )
 
 SET (SUBDIRS
+	4H-SiC
 Air
 Al
 AlGaAs
