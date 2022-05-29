@@ -23,6 +23,7 @@
 
 #include <numeric>
 #include <iomanip>
+#include <omp.h>
 
 #include "fvm_linear_solver.h"
 #include "parallel.h"
@@ -328,6 +329,7 @@ void FVM_LinearSolver::petsc_ksp_convergence_test(PetscInt its, PetscReal rnorm,
 void FVM_LinearSolver::set_petsc_linear_solver_type()
 {
   int ierr = 0;
+  int n_procs = omp_get_num_procs();
 
   switch (_linear_solver_type)
   {
@@ -412,6 +414,7 @@ void FVM_LinearSolver::set_petsc_linear_solver_type()
     case SolverSpecify::MUMPS:
     case SolverSpecify::PASTIX:
     case SolverSpecify::SuperLU_DIST:
+    case SolverSpecify::PARDISO:
       if (Genius::n_processors()>1)
       {
         switch(_linear_solver_type)
@@ -463,6 +466,22 @@ void FVM_LinearSolver::set_petsc_linear_solver_type()
             ierr = PCFactorSetMatSolverPackage (pc, "superlu_dist"); genius_assert(!ierr);
 #else
             MESSAGE<< "Warning:  no SuperLU_DIST solver configured, use BCGS instead!" << std::endl;
+            RECORD();
+            ierr = KSPSetType (ksp, (char*) KSPBCGSL);  genius_assert(!ierr);
+            ierr = PCSetType (pc, (char*) PCASM);       genius_assert(!ierr);
+            return;
+#endif
+            break;
+
+          case SolverSpecify::PARDISO:
+#ifdef PETSC_HAVE_PARDISO
+            MESSAGE<< "Using MKL PARDISO linear solver..."<<std::endl;
+            RECORD();
+            ierr = KSPSetType (ksp, (char*) KSPPREONLY); genius_assert(!ierr);
+            ierr = PCSetType  (pc, (char*) PCLU); genius_assert(!ierr);
+            ierr = PCFactorSetMatSolverPackage (pc, "mkl_pardiso"); genius_assert(!ierr);
+#else
+            MESSAGE<< "Warning:  no MKL PARDISO solver configured, use BCGS instead!" << std::endl;
             RECORD();
             ierr = KSPSetType (ksp, (char*) KSPBCGSL);  genius_assert(!ierr);
             ierr = PCSetType (pc, (char*) PCASM);       genius_assert(!ierr);
@@ -539,6 +558,19 @@ void FVM_LinearSolver::set_petsc_linear_solver_type()
 #endif
             break;
 
+          case SolverSpecify::PARDISO:
+#ifdef PETSC_HAVE_PARDISO
+            MESSAGE<< "Using MKL PARDISO linear solver..."<<std::endl;
+            RECORD();
+            ierr = PCFactorSetMatSolverPackage(pc, "mkl_pardiso"); genius_assert(!ierr);
+            ierr = PetscOptionsSetValue(NULL, "-mat_mkl_pardiso_65", std::to_string(n_procs).c_str());  genius_assert(!ierr);
+            //ierr = PetscOptionsSetValue(NULL, "-mat_mkl_pardiso_68", "1");  genius_assert(!ierr);
+#else
+            MESSAGE<< "Warning:  no MKL PARDISO solver configured, use BCGS instead!" << std::endl;
+            RECORD();
+#endif
+            break;
+
           default:
             // should never reach here
             genius_error();
@@ -575,7 +607,8 @@ void FVM_LinearSolver::set_petsc_preconditioner_type()
       _linear_solver_type == SolverSpecify::SuperLU ||
       _linear_solver_type == SolverSpecify::MUMPS   ||
       _linear_solver_type == SolverSpecify::PASTIX  ||
-      _linear_solver_type == SolverSpecify::SuperLU_DIST
+      _linear_solver_type == SolverSpecify::SuperLU_DIST||
+	  _linear_solver_type == SolverSpecify::PARDISO
      )
   {
     return;

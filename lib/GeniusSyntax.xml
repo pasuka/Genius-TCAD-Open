@@ -1161,6 +1161,7 @@
       <enum>tcqmr</enum>
       <enum>tfqmr</enum>
       <enum>umfpack</enum>
+      <enum>pardiso</enum>
     </parameter>
     <parameter name="ls.carrier" type="enum" default="bcgs">
       <description></description>
@@ -1267,6 +1268,8 @@
       <enum>linesearch</enum>
       <enum>newton</enum>
       <enum>trustregion</enum>
+      <enum>linesearchl2</enum>
+      <enum>linesearchcp</enum>
     </parameter>
     <parameter name="pclu.lag" type="int" default="10">
       <description></description>

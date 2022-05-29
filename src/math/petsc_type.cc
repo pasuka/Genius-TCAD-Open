@@ -23,6 +23,7 @@
 
 #include <string>
 #include <map>
+#include <iostream>
 
 #include "petsc_type.h"
 
@@ -40,6 +41,9 @@ namespace SolverSpecify
       NonLinearSolverName_to_NonLinearSolverType["newton"     ]  = Newton;
       NonLinearSolverName_to_NonLinearSolverType["basic"      ]  = Newton;
       NonLinearSolverName_to_NonLinearSolverType["linesearch" ]  = LineSearch;
+      NonLinearSolverName_to_NonLinearSolverType["linesearchl2" ]  = LineSearchL2;
+      NonLinearSolverName_to_NonLinearSolverType["linesearchcp" ]  = LineSearchCP;
+      NonLinearSolverName_to_NonLinearSolverType["richardson" ]  = Richardson;
       NonLinearSolverName_to_NonLinearSolverType["trustregion"]  = TrustRegion;
     }
 
@@ -93,6 +97,7 @@ namespace SolverSpecify
       LinearSolverName_to_LinearSolverType["mumps"       ]  = MUMPS;
       LinearSolverName_to_LinearSolverType["superlu_dist"]  = SuperLU_DIST;
       LinearSolverName_to_LinearSolverType["gss"         ]  = GSS;
+      LinearSolverName_to_LinearSolverType["pardiso"     ]  = PARDISO;
     }
 
   }

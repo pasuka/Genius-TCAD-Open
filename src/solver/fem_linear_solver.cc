@@ -22,6 +22,7 @@
 
 
 #include <numeric>
+#include <omp.h>
 
 #include "fem_linear_solver.h"
 #include "parallel.h"
@@ -180,6 +181,7 @@ FEM_LinearSolver::~FEM_LinearSolver()
 void FEM_LinearSolver::set_petsc_linear_solver_type(SolverSpecify::LinearSolverType linear_solver_type)
 {
   int ierr = 0;
+  int n_procs = omp_get_num_procs();
 
   _linear_solver_type = linear_solver_type;
 
@@ -265,6 +267,7 @@ void FEM_LinearSolver::set_petsc_linear_solver_type(SolverSpecify::LinearSolverT
     case SolverSpecify::MUMPS:
     case SolverSpecify::PASTIX:
     case SolverSpecify::SuperLU_DIST:
+    case SolverSpecify::PARDISO:
       if (Genius::n_processors()>1)
       {
         switch(linear_solver_type)
@@ -391,6 +394,19 @@ void FEM_LinearSolver::set_petsc_linear_solver_type(SolverSpecify::LinearSolverT
             RECORD();
 #endif
             break;
+
+          case SolverSpecify::PARDISO:
+#ifdef PETSC_HAVE_MKL_PARDISO
+          MESSAGE<< "Using MKL PARDISO linear solver..."<<std::endl;
+          RECORD();
+          ierr = PCFactorSetMatSolverPackage (pc, "mkl_pardiso"); MESSAGE << ierr << std::endl; RECORD(); genius_assert(!ierr);
+          ierr = PetscOptionsSetValue(NULL, "-mat_mkl_pardiso_65", std::to_string(n_procs).c_str());  genius_assert(!ierr);
+          //ierr = PetscOptionsSetValue(NULL, "-mat_mkl_pardiso_68", "1");  genius_assert(!ierr);
+#else
+          MESSAGE << "Warning:  no MKL PARDISO solver configured, use default LU solver instead!" << std::endl;
+          RECORD();
+#endif
+          break;
 
           default:
             // should never reach here

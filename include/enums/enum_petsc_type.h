@@ -39,7 +39,10 @@ namespace SolverSpecify
   enum NonLinearSolverType {
     Newton=0,
     LineSearch,
+	Richardson,
     TrustRegion,
+	LineSearchL2,
+	LineSearchCP,
     INVALID_NONLINEAR_SOLVER};
 
 
@@ -75,6 +78,7 @@ namespace SolverSpecify
                          MUMPS,
                          SuperLU_DIST,
                          GSS,
+						 PARDISO,
                          INVALID_LINEAR_SOLVER};
 
  /**

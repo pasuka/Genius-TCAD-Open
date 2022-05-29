@@ -22,6 +22,7 @@
 
 #include <numeric>
 #include <iomanip>
+#include <omp.h>
 
 #include "fvm_flex_nonlinear_solver.h"
 #include "parallel.h"
@@ -569,6 +570,60 @@ void FVM_FlexNonlinearSolver::set_petsc_nonelinear_solver_type()
       ierr = SNESLineSearchSetPostCheck(snesls, __genius_petsc_snes_post_check, this); genius_assert(!ierr);
       return;
 
+      case SolverSpecify::LineSearchL2:
+            std::cerr << "LineSerchL2" << std::endl;
+      #if PETSC_VERSION_GE(3,4,0)
+            ierr = SNESSetType(snes,SNESNEWTONLS); genius_assert(!ierr);
+      #else
+            ierr = SNESSetType(snes,SNESLS); genius_assert(!ierr);
+      #endif
+
+      #if PETSC_VERSION_GE(3,4,0)
+            ierr = SNESGetLineSearch(snes, &snesls); genius_assert(!ierr);
+            ierr = SNESLineSearchSetType(snesls, SNESLINESEARCHL2); genius_assert(!ierr);
+      #endif
+
+      #if PETSC_VERSION_EQ(3,3,0)
+            ierr = SNESGetSNESLineSearch(snes, &snesls); genius_assert(!ierr);
+            ierr = SNESLineSearchSetType(snesls, SNESLINESEARCHL2); genius_assert(!ierr);
+      #endif
+
+      #if PETSC_VERSION_LE(3,2,0)
+            ierr = SNESLineSearchSet(snes, SNESLineSearchCubic, PETSC_NULL); genius_assert(!ierr);
+      #endif
+
+            // set the LineSearch pre/post check routine
+            ierr = SNESLineSearchSetPreCheck(snesls, __genius_petsc_snes_pre_check, this); genius_assert(!ierr);
+            ierr = SNESLineSearchSetPostCheck(snesls, __genius_petsc_snes_post_check, this); genius_assert(!ierr);
+            return;
+
+            case SolverSpecify::LineSearchCP:
+      #if PETSC_VERSION_GE(3,4,0)
+            ierr = SNESSetType(snes,SNESNEWTONLS); genius_assert(!ierr);
+      #else
+            ierr = SNESSetType(snes,SNESLS); genius_assert(!ierr);
+      #endif
+
+      #if PETSC_VERSION_GE(3,4,0)
+            ierr = SNESGetLineSearch(snes, &snesls); genius_assert(!ierr);
+            ierr = SNESLineSearchSetType(snesls, SNESLINESEARCHCP); genius_assert(!ierr);
+      #endif
+
+      #if PETSC_VERSION_EQ(3,3,0)
+            ierr = SNESGetSNESLineSearch(snes, &snesls); genius_assert(!ierr);
+            ierr = SNESLineSearchSetType(snesls, SNESLINESEARCHCP); genius_assert(!ierr);
+      #endif
+
+      #if PETSC_VERSION_LE(3,2,0)
+            ierr = SNESLineSearchSet(snes, SNESLineSearchCubic, PETSC_NULL); genius_assert(!ierr);
+      #endif
+
+            // set the LineSearch pre/post check routine
+            ierr = SNESLineSearchSetPreCheck(snesls, __genius_petsc_snes_pre_check, this); genius_assert(!ierr);
+            ierr = SNESLineSearchSetPostCheck(snesls, __genius_petsc_snes_post_check, this); genius_assert(!ierr);
+            return;
+
+
       case SolverSpecify::TrustRegion:
 #if PETSC_VERSION_GE(3,4,0)
       ierr = SNESSetType(snes, SNESNEWTONTR); genius_assert(!ierr);
@@ -591,6 +646,7 @@ void FVM_FlexNonlinearSolver::set_petsc_nonelinear_solver_type()
 void FVM_FlexNonlinearSolver::set_petsc_linear_solver_type()
 {
   int ierr = 0;
+  int n_procs = omp_get_num_procs();
 
   switch (_linear_solver_type)
   {
@@ -674,6 +730,7 @@ void FVM_FlexNonlinearSolver::set_petsc_linear_solver_type()
       case SolverSpecify::MUMPS:
       case SolverSpecify::PASTIX:
       case SolverSpecify::SuperLU_DIST:
+      case SolverSpecify::PARDISO:
       if (Genius::n_processors()>1)
       {
         switch(_linear_solver_type)
@@ -810,6 +867,19 @@ void FVM_FlexNonlinearSolver::set_petsc_linear_solver_type()
 #endif
             break;
 
+            case SolverSpecify::PARDISO:
+#ifdef PETSC_HAVE_MKL_PARDISO
+            MESSAGE<< "Using MKL PARDISO linear solver..."<<std::endl;
+            RECORD();
+            ierr = PCFactorSetMatSolverPackage (pc, "mkl_pardiso"); MESSAGE << ierr << std::endl; RECORD(); genius_assert(!ierr);
+            ierr = PetscOptionsSetValue(NULL, "-mat_mkl_pardiso_65", std::to_string(n_procs).c_str());  genius_assert(!ierr);
+            //ierr = PetscOptionsSetValue(NULL, "-mat_mkl_pardiso_68", "1");  genius_assert(!ierr);
+#else
+            MESSAGE << "Warning:  no MKL PARDISO solver configured, use default LU solver instead!" << std::endl;
+            RECORD();
+#endif
+            break;
+
             default:
             // should never reach here
             genius_error();
@@ -844,7 +914,8 @@ void FVM_FlexNonlinearSolver::set_petsc_preconditioner_type()
       _linear_solver_type == SolverSpecify::SuperLU ||
       _linear_solver_type == SolverSpecify::MUMPS   ||
       _linear_solver_type == SolverSpecify::PASTIX  ||
-      _linear_solver_type == SolverSpecify::SuperLU_DIST
+      _linear_solver_type == SolverSpecify::SuperLU_DIST||
+	  _linear_solver_type == SolverSpecify::PARDISO
      )
   {
     return;
