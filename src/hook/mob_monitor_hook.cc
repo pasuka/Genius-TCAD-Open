@@ -162,7 +162,7 @@ void MobMonitorHook::post_solve()
   {
     std::cout<<"MobMonitorHook dump " << vtk_filename.str()<<std::endl;
     vtkXMLUnstructuredGridWriter* writer = vtkXMLUnstructuredGridWriter::New();
-    writer->SetInput(grid);
+    writer->SetInputData(grid);
 
     writer->SetFileName(vtk_filename.str().c_str());
     writer->Write();

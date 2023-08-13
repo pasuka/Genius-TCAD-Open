@@ -331,7 +331,7 @@ void DDMMonitorHook::post_check(void * f, void * x, void * dx, void * w, bool & 
   {
     std::cout<<"DDMMonitorHook dump " << vtk_filename.str()<<std::endl;
     XMLUnstructuredGridWriter* writer = XMLUnstructuredGridWriter::New();
-    writer->SetInput(grid);
+    writer->SetInputData(grid);
     writer->setExtraHeader(this->export_extra_info());
 
     writer->SetFileName(vtk_filename.str().c_str());

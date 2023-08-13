@@ -1027,7 +1027,7 @@ void VTK2IO::write (const std::string& name)
     if(Genius::processor_id() == 0)
     {
       XMLUnstructuredGridWriter* writer = XMLUnstructuredGridWriter::New();
-      writer->SetInput(_vtk_grid);
+      writer->SetInputData(_vtk_grid);
       writer->setExtraHeader(this->export_extra_info());
 
       writer->SetFileName(name.c_str());
