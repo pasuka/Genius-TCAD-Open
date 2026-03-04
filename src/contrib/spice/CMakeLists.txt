@@ -1,10 +1,10 @@
 
-SET (CXX_SRCS
-schur_solver.cc
-spice_ckt.cc
+set(CXX_SRCS
+  schur_solver.cc
+  spice_ckt.cc
 )
 
-ADD_LIBRARY(spice ${CXX_SRCS})
-
+add_library(spice STATIC ${CXX_SRCS})
+target_include_directories(spice PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 

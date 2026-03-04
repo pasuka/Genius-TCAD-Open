@@ -1,10 +1,11 @@
 
-SET (CXX_SRCS
-triangle.c
+set(CXX_SRCS
+  triangle.c
 )
-ADD_DEFINITIONS(-DTRILIBRARY)
 
-ADD_LIBRARY(triangle ${CXX_SRCS})
+add_library(triangle STATIC ${CXX_SRCS})
+target_compile_definitions(triangle PUBLIC TRILIBRARY)
+target_include_directories(triangle PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 
