@@ -1,9 +1,9 @@
 
-SET (CXX_SRCS
-spline.cc
+set(CXX_SRCS
+  spline.cc
 )
 
-ADD_LIBRARY(spline ${CXX_SRCS})
-
+add_library(spline STATIC ${CXX_SRCS})
+target_include_directories(spline PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 

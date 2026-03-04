@@ -1,9 +1,9 @@
 
-SET (CXX_SRCS
-tif3d.cc
+set(CXX_SRCS
+  tif3d.cc
 )
 
-ADD_LIBRARY(tif3d ${CXX_SRCS})
-
+add_library(tif3d STATIC ${CXX_SRCS})
+target_include_directories(tif3d PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 

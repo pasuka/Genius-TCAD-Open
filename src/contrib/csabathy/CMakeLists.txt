@@ -1,8 +1,9 @@
 
-SET (CXX_SRCS
-csa.cc
-svd.c
+set(CXX_SRCS
+  csa.cc
+  svd.c
 )
-#INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-ADD_LIBRARY(csabathy ${CXX_SRCS})
+
+add_library(csabathy STATIC ${CXX_SRCS})
+target_include_directories(csabathy PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

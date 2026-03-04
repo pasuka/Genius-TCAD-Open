@@ -1,11 +1,12 @@
 
-SET (CXX_SRCS
-dof_object.cc
-genius_env.cc
-log.cc
-memory_log.cc
-perf_log.cc
+set(CXX_SRCS
+  dof_object.cc
+  genius_env.cc
+  log.cc
+  memory_log.cc
+  perf_log.cc
 )
 
-ADD_LIBRARY(base SHARED ${CXX_SRCS})
+add_library(base STATIC ${CXX_SRCS})
+target_include_directories(base PUBLIC ${CMAKE_SOURCE_DIR}/include/base)
 

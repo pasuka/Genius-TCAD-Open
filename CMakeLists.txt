@@ -1,115 +1,230 @@
-#cmake_minimum_required(VERSION 3.16)
-PROJECT(GENIUS)
+cmake_minimum_required(VERSION 3.16)
+project(Genius VERSION 1.9.0 LANGUAGES C CXX Fortran)
 
-#set(CMAKE_VERBOSE_MAKEFILE on)
+# C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-#message(${CMAKE_SYSTEM_PROCESSOR})
+# Position-independent code (needed for shared/module libs)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-#cmake_host_system_information(RESULT PRETTY_NAME QUERY PROCESSOR_NAME)
-#message(STATUS "${PRETTY_NAME}")
+# Module path for custom Find modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-#cmake_host_system_information(RESULT PRETTY_NAME QUERY PROCESSOR_DESCRIPTION)
-#message(STATUS "${PRETTY_NAME}")
+include(GNUInstallDirs)
+include(CheckIncludeFile)
+include(CheckTypeSize)
 
-#message(${CMAKE_SHARED_LIBRARY_SUFFIX})
+# ── Required dependencies ────────────────────────────────────────────────────
 
-if(COMMAND cmake_policy)
-      cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
+find_package(MPI REQUIRED)
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+find_package(FLEX REQUIRED)
+find_package(BISON REQUIRED)
+find_package(PETSc REQUIRED)
 
-#-fplugin-arg-python-command='import gcc; help(gcc)'
-#-fplugin-arg-python-arg='/mnt/github/gcc-callgraph-plugin/gcc-callgraph-plugin.py'
-#-fplugin-arg-python-arg='/mnt/github/gcc-python-plugin/examples/show-callgraph.py'
-SET(DEBUG_FLAGS "-O0 -ggdb -pg -fPIC -fno-omit-frame-pointer -fplugin=python -fplugin-arg-python-arg=/mnt/github/gcc-callgraph-plugin/gcc-callgraph-plugin.py -flto -flto-partition=none ")
-SET(OPTIMIZE_FLAGS "-march=westmere -mtune=westmere -m64 -msse4.2 -mfpmath=sse+387 -O3  -funroll-loops -fno-omit-frame-pointer")
+# ── Optional dependencies ────────────────────────────────────────────────────
 
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DEBUG_FLAGS}")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEBUG_FLAGS}")
-#set(CMAKE_CXX_FLAGS "${CMAKE_FORTRAN_FLAGS} ${DEBUG_FLAGS}")
+option(GENIUS_ENABLE_VTK  "Enable VTK support"  ON)
+option(GENIUS_ENABLE_CGNS "Enable CGNS support" ON)
+option(GENIUS_ENABLE_HDF5 "Enable HDF5 support" OFF)
+option(GENIUS_ENABLE_SLEPC "Enable SLEPc support" OFF)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPTIMIZE_FLAGS}")
-set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS} ${OPTIMIZE_FLAGS}")
-set(CMAKE_Fortran_FLAGS "${CMAKE_FORTRAN_FLAGS} ${OPTIMIZE_FLAGS}")
+if(GENIUS_ENABLE_VTK)
+  find_package(VTK QUIET)
+  if(VTK_FOUND)
+    message(STATUS "VTK found: ${VTK_VERSION}")
+  else()
+    message(STATUS "VTK not found; VTK support disabled")
+    set(GENIUS_ENABLE_VTK OFF)
+  endif()
+endif()
 
-SET(INCLUDE_BASE ${CMAKE_SOURCE_DIR}/include)
-SET(PETSC_INCLUDE $ENV{PETSC_DIR}/$ENV{PETSC_ARCH}/include)
-SET(PETSC_ARCHIVE -L$ENV{PETSC_DIR}/$ENV{PETSC_ARCH}/lib -lpetsc)
+if(GENIUS_ENABLE_CGNS)
+  find_library(CGNS_LIBRARY NAMES cgns)
+  find_path(CGNS_INCLUDE_DIR NAMES cgnslib.h)
+  if(CGNS_LIBRARY AND CGNS_INCLUDE_DIR)
+    message(STATUS "CGNS found: ${CGNS_LIBRARY}")
+  else()
+    message(STATUS "CGNS not found; CGNS support disabled")
+    set(GENIUS_ENABLE_CGNS OFF)
+  endif()
+endif()
 
-SET(OMP_ARCHIVE $ENV{ONEAPI_ROOT}/compiler/latest/linux/compiler/lib/intel64_lin/libiomp5.so)
+if(GENIUS_ENABLE_HDF5)
+  find_package(HDF5 QUIET)
+  if(NOT HDF5_FOUND)
+    set(GENIUS_ENABLE_HDF5 OFF)
+  endif()
+endif()
 
-SET(BLAS_ARCHIVE $ENV{MKLROOT}/lib/intel64/libmkl_intel_lp64.so $ENV{MKLROOT}/lib/intel64/libmkl_gnu_thread.so $ENV{MKLROOT}/lib/intel64/libmkl_core.so)
-SET(LAPACK_ARCHIVE $ENV{MKLROOT}/lib/intel64/libmkl_intel_lp64.so $ENV{MKLROOT}/lib/intel64/libmkl_gnu_thread.so $ENV{MKLROOT}/lib/intel64/libmkl_core.so)
+if(GENIUS_ENABLE_SLEPC)
+  find_library(SLEPC_LIBRARY NAMES slepc)
+  find_path(SLEPC_INCLUDE_DIR NAMES slepc.h)
+  if(NOT (SLEPC_LIBRARY AND SLEPC_INCLUDE_DIR))
+    set(GENIUS_ENABLE_SLEPC OFF)
+  endif()
+endif()
 
-#SET(SUPERLU_ARCHIVE ${PETSC_DIR}/lib/libsuperlu_4.0.a)
-SET(MPI_INCLUDE $ENV{I_MPI_ROOT}/include/) #${PETSC_DIR}/include/mpiuni)
-SET(MPI_ARCHIVE -L$ENV{I_MPI_ROOT}/lib -L$ENV{I_MPI_ROOT}/lib/release -lmpifort -lmpicxx -lmpi -lrt)
+# ── Version string (via git) ─────────────────────────────────────────────────
 
-SET(MXML_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/mxml)
-SET(TREX_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/trex)
-SET(SPICE_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/spice)
-SET(KDTREE_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/kdtree)
-SET(CSABATHY_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/csabathy)
-SET(NN_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/nn)
-SET(ANN_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/ann)
-SET(EXPREVAL_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/expreval)
-SET(TRIANGLE_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/triangle)
-SET(DFISE_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/dfise)
-SET(STANFORD_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/stanford)
-SET(TIF3D_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/tif3d)
-SET(TIF_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/tif)
-SET(SPLINE_INCLUDE ${CMAKE_SOURCE_DIR}/src/contrib/spline)
+find_package(Git QUIET)
+set(GENIUS_VERSION_STRING "")
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE _git_hash
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(_git_hash)
+    set(GENIUS_VERSION_STRING "git-${_git_hash}")
+  endif()
+endif()
+if(NOT GENIUS_VERSION_STRING)
+  string(TIMESTAMP GENIUS_VERSION_STRING "%Y%m%d")
+endif()
+message(STATUS "Genius version string: ${GENIUS_VERSION_STRING}")
 
-SET(HAVE_VTK 1)
-SET(VTK_INCLUDE /usr/local/include/vtk-8.0)
-SET(VTK_ARCHIVE -L/usr/local/lib/vtk-8.0 -lvtkIOCore-8.0 -lvtkIOXML-8.0 -lvtkIOXMLParser-8.0 -lvtkFiltersGeneral-8.0 -lvtkCommonCore-8.0 -lvtkCommonDataModel-8.0 -lvtkCommonExecutionModel-8.0 -lvtkCommonMath-8.0 -lvtkCommonMisc-8.0 -lvtkCommonSystem-8.0 -lvtkCommonTransforms-8.0 -lvtkalglib-8.0 -lvtkexpat-8.0 -lvtklz4-8.0 -lvtksys-8.0 -lvtkzlib-8.0 -lmetis)
+# ── config.h generation ──────────────────────────────────────────────────────
 
-SET(FLEX /usr/bin/flex)
-SET(BISON /usr/bin/bison)
-#SET(CGNS_INCLUDE ${PETSC_DIR}/include)
-#SET(CGNS_ARCHIVE ${PETSC_DIR}/lib/libcgns.so)
-SET(CGNS_INCLUDE /usr/bin/include)
-SET(CGNS_ARCHIVE -lcgns)
+# Platform detection (variable names match config.h.in #cmakedefine directives)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(LINUX 1)
+  set(DLLHOOK 1)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(WINDOWS 1)
+  set(WIN32 1)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(DARWIN 1)
+endif()
 
-INCLUDE_DIRECTORIES(
-${PETSC_INCLUDE}
-${MPI_INCLUDE}
-${INCLUDE_BASE}
-${INCLUDE_BASE}/base
-${INCLUDE_BASE}/bc
-${INCLUDE_BASE}/enums
-${INCLUDE_BASE}/fe
-${INCLUDE_BASE}/geom
-${INCLUDE_BASE}/hook
-${INCLUDE_BASE}/interpolation
-${INCLUDE_BASE}/material
-${INCLUDE_BASE}/math
-${INCLUDE_BASE}/mesh
-${INCLUDE_BASE}/meshgen
-${INCLUDE_BASE}/parser
-${INCLUDE_BASE}/partition
-${INCLUDE_BASE}/quadrature
-${INCLUDE_BASE}/solution
-${INCLUDE_BASE}/solver
-${INCLUDE_BASE}/solver/ddm1
-${INCLUDE_BASE}/solver/ddm1r
-${INCLUDE_BASE}/solver/ddm2
-${INCLUDE_BASE}/solver/ddm_ac
-${INCLUDE_BASE}/solver/dg
-${INCLUDE_BASE}/solver/doping_analytic
-${INCLUDE_BASE}/solver/ebm3
-${INCLUDE_BASE}/solver/emfem2d
-${INCLUDE_BASE}/solver/hall
-${INCLUDE_BASE}/solver/hdm
-${INCLUDE_BASE}/solver/mix1
-${INCLUDE_BASE}/solver/mixA1
-${INCLUDE_BASE}/solver/mixA2
-${INCLUDE_BASE}/solver/mixA3
-${INCLUDE_BASE}/solver/mole_analytic
-${INCLUDE_BASE}/solver/poisson
-${INCLUDE_BASE}/solver/ray_tracing
-${INCLUDE_BASE}/solver/stress_solver
-${INCLUDE_BASE}/source
-${INCLUDE_BASE}/utils
+# Type sizes
+check_type_size("double"         SIZEOF_DOUBLE)
+check_type_size("float"          SIZEOF_FLOAT)
+check_type_size("int"            SIZEOF_INT)
+check_type_size("long int"       SIZEOF_LONG_INT)
+check_type_size("long long int"  SIZEOF_LONG_LONG_INT)
+check_type_size("short int"      SIZEOF_SHORT_INT)
+check_type_size("void *"         SIZEOF_VOID_P)
+
+# Standard headers
+check_include_file("fcntl.h"       HAVE_FCNTL_H)
+check_include_file("float.h"       HAVE_FLOAT_H)
+check_include_file("fenv.h"        HAVE_FENV_H)
+check_include_file("limits.h"      HAVE_LIMITS_H)
+check_include_file("stddef.h"      HAVE_STDDEF_H)
+check_include_file("stdlib.h"      HAVE_STDLIB_H)
+check_include_file("string.h"      HAVE_STRING_H)
+check_include_file("stdio.h"       HAVE_STDIO_H)
+check_include_file("assert.h"      HAVE_ASSERT_H)
+check_include_file("sys/time.h"    HAVE_SYS_TIME_H)
+check_include_file("sys/types.h"   HAVE_SYS_TYPES_H)
+check_include_file("sys/stat.h"    HAVE_SYS_STAT_H)
+check_include_file("memory.h"      HAVE_MEMORY_H)
+check_include_file("strings.h"     HAVE_STRINGS_H)
+check_include_file("inttypes.h"    HAVE_INTTYPES_H)
+check_include_file("stdint.h"      HAVE_STDINT_H)
+check_include_file("unistd.h"      HAVE_UNISTD_H)
+
+# C++ feature checks
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles(
+  "#include <tr1/unordered_map>\nint main(){std::tr1::unordered_map<int,int> m; return 0;}"
+  HAVE_TR1_UNORDERED_MAP)
+check_cxx_source_compiles(
+  "#include <tr1/unordered_set>\nint main(){std::tr1::unordered_set<int> s; return 0;}"
+  HAVE_TR1_UNORDERED_SET)
+check_cxx_source_compiles(
+  "#include <unordered_map>\nint main(){std::unordered_map<int,int> m; return 0;}"
+  HAVE_TR1_UNORDERED_MAP_WITH_STD_HEADER)
+check_cxx_source_compiles(
+  "#include <unordered_set>\nint main(){std::unordered_set<int> s; return 0;}"
+  HAVE_TR1_UNORDERED_SET_WITH_STD_HEADER)
+check_cxx_source_compiles(
+  "#include <limits>\nint main(){double d = std::numeric_limits<double>::max(); return 0;}"
+  HAVE_STD_LIMITS)
+check_cxx_source_compiles(
+  "namespace Foo{} int main(){return 0;}"
+  HAVE_NAMESPACES)
+check_cxx_source_compiles(
+  "#include <sstream>\nint main(){std::ostringstream s; return 0;}"
+  HAVE_SSTREAM)
+
+# PETSc/VTK/CGNS feature flags for config.h
+set(HAVE_PETSC 1)
+set(WITH_PETSCSCALAR_DOUBLE 1)
+
+if(GENIUS_ENABLE_VTK AND VTK_FOUND)
+  set(HAVE_VTK 1)
+  # Check for vtkConfigure.h
+  find_path(_vtk_cfg_dir NAMES vtkConfigure.h HINTS ${VTK_INCLUDE_DIRS})
+  if(_vtk_cfg_dir)
+    set(HAVE_VTKCONFIGURE_H 1)
+  endif()
+endif()
+
+if(GENIUS_ENABLE_CGNS AND CGNS_LIBRARY AND CGNS_INCLUDE_DIR)
+  set(HAVE_CGNS 1)
+  set(HAVE_CGNSLIB_H 1)
+endif()
+
+configure_file(
+  "${CMAKE_SOURCE_DIR}/cmake/config.h.in"
+  "${CMAKE_BINARY_DIR}/include/config.h"
 )
-SET(VERSION_STRING luther)
-ADD_SUBDIRECTORY(src)
+
+# ── Global include directories ───────────────────────────────────────────────
+
+set(INCLUDE_BASE ${CMAKE_SOURCE_DIR}/include)
+
+# These are used by subdirectory targets via target_include_directories,
+# but we also set them globally so that the existing per-module CMakeLists
+# (which use INCLUDE_DIRECTORIES) continue to work during migration.
+include_directories(
+  ${CMAKE_BINARY_DIR}/include
+  ${INCLUDE_BASE}
+  ${INCLUDE_BASE}/base
+  ${INCLUDE_BASE}/bc
+  ${INCLUDE_BASE}/enums
+  ${INCLUDE_BASE}/fe
+  ${INCLUDE_BASE}/geom
+  ${INCLUDE_BASE}/hook
+  ${INCLUDE_BASE}/interpolation
+  ${INCLUDE_BASE}/material
+  ${INCLUDE_BASE}/math
+  ${INCLUDE_BASE}/mesh
+  ${INCLUDE_BASE}/meshgen
+  ${INCLUDE_BASE}/parser
+  ${INCLUDE_BASE}/partition
+  ${INCLUDE_BASE}/quadrature
+  ${INCLUDE_BASE}/solution
+  ${INCLUDE_BASE}/solver
+  ${INCLUDE_BASE}/solver/ddm1
+  ${INCLUDE_BASE}/solver/ddm1r
+  ${INCLUDE_BASE}/solver/ddm2
+  ${INCLUDE_BASE}/solver/ddm_ac
+  ${INCLUDE_BASE}/solver/dg
+  ${INCLUDE_BASE}/solver/doping_analytic
+  ${INCLUDE_BASE}/solver/ebm3
+  ${INCLUDE_BASE}/solver/emfem2d
+  ${INCLUDE_BASE}/solver/hall
+  ${INCLUDE_BASE}/solver/hdm
+  ${INCLUDE_BASE}/solver/mix1
+  ${INCLUDE_BASE}/solver/mixA1
+  ${INCLUDE_BASE}/solver/mixA2
+  ${INCLUDE_BASE}/solver/mixA3
+  ${INCLUDE_BASE}/solver/mole_analytic
+  ${INCLUDE_BASE}/solver/poisson
+  ${INCLUDE_BASE}/solver/ray_tracing
+  ${INCLUDE_BASE}/solver/stress_solver
+  ${INCLUDE_BASE}/source
+  ${INCLUDE_BASE}/utils
+  ${PETSc_INCLUDE_DIRS}
+  ${MPI_CXX_INCLUDE_DIRS}
+)
+
+add_subdirectory(src)

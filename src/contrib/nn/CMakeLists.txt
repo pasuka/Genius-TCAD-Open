@@ -1,12 +1,11 @@
 
-SET (CXX_SRCS
-delaunay.cc
-istack.cc
-lpi.cc
+set(CXX_SRCS
+  delaunay.cc
+  istack.cc
+  lpi.cc
 )
 
-INCLUDE_DIRECTORIES(${TRIANGLE_INCLUDE})
-ADD_LIBRARY(nn ${CXX_SRCS})
-
+add_library(nn STATIC ${CXX_SRCS})
+target_include_directories(nn PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 

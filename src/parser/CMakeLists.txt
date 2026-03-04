@@ -1,67 +1,43 @@
 
-SET (CXX_SRCS
-${CMAKE_CURRENT_SOURCE_DIR}/input_dummy.cc
-${CMAKE_CURRENT_SOURCE_DIR}/pattern_dummy.cc
-file_include.cc
-parser_card.cc
-parser.cc
-parser_parameter.cc
-pattern.cc
-pattern_xml.cc
+# Use CMake's FindFLEX / FindBISON macros for proper dependency tracking
+FLEX_TARGET(InputLexer
+  input.l
+  ${CMAKE_CURRENT_BINARY_DIR}/input.yy.c
+)
+BISON_TARGET(InputParser
+  input.y
+  ${CMAKE_CURRENT_BINARY_DIR}/input.tab.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/input.tab.h
+)
+ADD_FLEX_BISON_DEPENDENCY(InputLexer InputParser)
+
+FLEX_TARGET(PatternLexer
+  pattern.l
+  ${CMAKE_CURRENT_BINARY_DIR}/pattern.yy.c
+)
+BISON_TARGET(PatternParser
+  pattern.y
+  ${CMAKE_CURRENT_BINARY_DIR}/pattern.tab.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/pattern.tab.h
+)
+ADD_FLEX_BISON_DEPENDENCY(PatternLexer PatternParser)
+
+set(CXX_SRCS
+  ${FLEX_InputLexer_OUTPUTS}
+  ${BISON_InputParser_OUTPUTS}
+  ${FLEX_PatternLexer_OUTPUTS}
+  ${BISON_PatternParser_OUTPUTS}
+  file_include.cc
+  parser_card.cc
+  parser.cc
+  parser_parameter.cc
+  pattern.cc
+  pattern_xml.cc
 )
 
-INCLUDE_DIRECTORIES(${MXML_INCLUDE})
-ADD_LIBRARY(parser ${CXX_SRCS})
-
-SET_SOURCE_FILES_PROPERTIES(input_dummy.cc input.yy.c input.tab.h input.tab.c PROPERTIES GENERATED TRUE)
-SET_SOURCE_FILES_PROPERTIES(pattern_dummy.cc pattern.yy.c pattern.tab.h pattern.tab.c PROPERTIES GENERATED TRUE)
-
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/input_dummy.cc
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND touch input_dummy.cc
-    DEPENDS input.yy.c input.tab.h input.l input.y
+add_library(parser STATIC ${CXX_SRCS})
+target_include_directories(parser PUBLIC
+  ${CMAKE_SOURCE_DIR}/include/parser
+  ${CMAKE_CURRENT_BINARY_DIR}
 )
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/input.yy.c
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${FLEX}
-    ARGS    -oinput.yy.c input.l
-    DEPENDS input.tab.h input.l
-)
-
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/input.tab.c ${CMAKE_CURRENT_SOURCE_DIR}/input.tab.h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${BISON}
-    ARGS -v -d input.y
-    # these must be read from parser.y
-    DEPENDS input.y
-)
-
-
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pattern_dummy.cc
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND touch pattern_dummy.cc
-    DEPENDS pattern.yy.c pattern.tab.h pattern.l pattern.y
-)
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pattern.yy.c
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${FLEX}
-    ARGS    -opattern.yy.c pattern.l
-    DEPENDS pattern.tab.h pattern.l
-)
-
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pattern.tab.c ${CMAKE_CURRENT_SOURCE_DIR}/pattern.tab.h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ${BISON}
-    ARGS -v -d pattern.y
-    # these must be read from parser.y
-    DEPENDS pattern.y
-)
-
-
 
