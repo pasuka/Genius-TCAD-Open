@@ -37,6 +37,7 @@ endif()
 
 add_library(solution STATIC ${CXX_SRCS})
 target_include_directories(solution PUBLIC ${CMAKE_SOURCE_DIR}/include/solution)
+target_link_libraries(solution PRIVATE tif3d stanford expreval)
 if(GENIUS_ENABLE_VTK AND VTK_FOUND)
   target_include_directories(solution PRIVATE ${VTK_INCLUDE_DIRS})
 endif()
