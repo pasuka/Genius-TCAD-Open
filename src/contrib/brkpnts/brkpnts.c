@@ -305,7 +305,14 @@ int main ( int cArg, char *apszArg[] )
 
 
   /* write header file */
-  file = fopen("brkpnts.h", "wt");
+  /* Use argv[1] as the output path if provided, otherwise default to "brkpnts.h" in CWD */
+  file = fopen(cArg >= 2 ? apszArg[1] : "brkpnts.h", "wt");
+  if (!file)
+  {
+    fprintf(stderr, "ERROR: cannot open output file '%s' for writing\n",
+            cArg >= 2 ? apszArg[1] : "brkpnts.h");
+    exit(1);
+  }
   for(ppsz = apszHeader1; *ppsz; ++ppsz) fprintf(file, "%s\n", *ppsz);
   fprintf(file, "#define BP0_BERN    %.15le\n", B[0]);
   fprintf(file, "#define BP1_BERN    %.15le\n", B[1]);
