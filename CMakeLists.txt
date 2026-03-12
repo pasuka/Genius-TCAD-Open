@@ -228,6 +228,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/contrib/mxml
   ${CMAKE_SOURCE_DIR}/src/contrib/trex
   ${CMAKE_SOURCE_DIR}/src/contrib/nn
+  ${CMAKE_SOURCE_DIR}/src/contrib/csabathy
   ${CMAKE_SOURCE_DIR}/src/contrib/spice
   ${PETSc_INCLUDE_DIRS}
   ${MPI_CXX_INCLUDE_DIRS}

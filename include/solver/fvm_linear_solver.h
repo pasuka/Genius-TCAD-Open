@@ -105,7 +105,7 @@ public:
    * calculate the n largest and smallest eigen value of matrix
    * optinally get the ith smallest vec and jth largest vec
    */
-  void eigen_value_of_matrix(int n=1, int i=0, Vec = PETSC_NULL, int j=0, Vec = PETSC_NULL);
+  void eigen_value_of_matrix(int n=1, int i=0, Vec = PETSC_NULLPTR, int j=0, Vec = PETSC_NULLPTR);
 
   /**
    * @return the jacobian_matrix
