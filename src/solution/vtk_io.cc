@@ -48,7 +48,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
-#include "vtkConfigure.h"
+#include "vtkVersion.h"
 #include "vtkIntArray.h"
 #include "vtkFloatArray.h"
 #include "vtkPointData.h"
