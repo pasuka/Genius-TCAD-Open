@@ -9,6 +9,9 @@ set(CXX_SRCS
 )
 
 add_library(interpolation STATIC ${CXX_SRCS})
-target_include_directories(interpolation PUBLIC ${CMAKE_SOURCE_DIR}/include/interpolation)
+target_include_directories(interpolation PUBLIC
+  ${CMAKE_SOURCE_DIR}/include/interpolation
+  ${CMAKE_SOURCE_DIR}/src/contrib/csabathy
+)
 target_link_libraries(interpolation PRIVATE csabathy ann nn)
 
