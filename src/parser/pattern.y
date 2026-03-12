@@ -2,12 +2,15 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+
+#include "pattern.h"
 
 extern int yylineno;
 extern int yylex();
 static int yyerror(void * dummy, const char *s);
 
-static struct Parser::PatternCard card;
+static Parser::PatternCard card;
 static Parser::Parameter   parameter;
 
 //#define VERBOSE

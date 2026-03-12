@@ -9,5 +9,8 @@ set(CXX_SRCS
 )
 
 add_library(meshgen STATIC ${CXX_SRCS})
-target_include_directories(meshgen PUBLIC ${CMAKE_SOURCE_DIR}/include/meshgen)
+target_include_directories(meshgen PUBLIC
+  ${CMAKE_SOURCE_DIR}/include/meshgen
+  ${CMAKE_SOURCE_DIR}/src/contrib/triangle
+)
 
