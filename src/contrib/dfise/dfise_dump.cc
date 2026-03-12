@@ -136,7 +136,7 @@ int main(int argc, char **argv)
     std::string grid_file = input_file + ".grd";
     std::string data_file = input_file + ".dat";
 #ifdef WINDOWS
-    if ( _access( (void*)grid_file.c_str(),  04 ) == -1 )
+    if ( _access( grid_file.c_str(),  04 ) == -1 )
 #else
     if ( access( grid_file.c_str(),  R_OK ) == -1 )
 #endif
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
     }
 
 #ifdef WINDOWS
-    if ( _access( (void*)data_file.c_str(),  04 ) == -1 )
+    if ( _access( data_file.c_str(),  04 ) == -1 )
 #else
     if ( access( data_file.c_str(),  R_OK ) == -1 )
 #endif
