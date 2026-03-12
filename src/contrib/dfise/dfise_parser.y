@@ -1,3 +1,7 @@
+%code requires {
+#include "dfise_block.h"
+}
+
 %{
 
 extern int yylineno;

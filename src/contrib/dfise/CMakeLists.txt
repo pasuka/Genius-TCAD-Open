@@ -10,6 +10,14 @@ BISON_TARGET(DfiseParser
 )
 ADD_FLEX_BISON_DEPENDENCY(DfiseLexer DfiseParser)
 
+# The generated C files are #included directly by dfise.cc inside the
+# DFISE namespace, so they must not be compiled as separate translation units.
+set_source_files_properties(
+  ${FLEX_DfiseLexer_OUTPUTS}
+  ${BISON_DfiseParser_OUTPUT_SOURCE}
+  PROPERTIES HEADER_FILE_ONLY TRUE
+)
+
 set(CXX_SRCS
   ${FLEX_DfiseLexer_OUTPUTS}
   ${BISON_DfiseParser_OUTPUTS}

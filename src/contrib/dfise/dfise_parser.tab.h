@@ -59,6 +59,9 @@ extern int yydebug;
   };
 #endif
 
+/* Code required by the parser types.  */
+#include "dfise_block.h"
+
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
