@@ -71,6 +71,11 @@ target_link_libraries(genius PRIVATE
 
 if(GENIUS_ENABLE_VTK AND VTK_FOUND)
   target_link_libraries(genius PRIVATE ${VTK_LIBRARIES})
+  # VTK 9+ requires vtk_module_autoinit so that VTK object factories
+  # (readers, writers, etc.) are properly registered at start-up.
+  if(COMMAND vtk_module_autoinit)
+    vtk_module_autoinit(TARGETS genius MODULES ${VTK_LIBRARIES})
+  endif()
 endif()
 
 if(GENIUS_ENABLE_CGNS AND CGNS_LIBRARY)

@@ -39,7 +39,11 @@ add_library(solution STATIC ${CXX_SRCS})
 target_include_directories(solution PUBLIC ${CMAKE_SOURCE_DIR}/include/solution)
 target_link_libraries(solution PRIVATE tif3d stanford expreval)
 if(GENIUS_ENABLE_VTK AND VTK_FOUND)
+  # Keep VTK_INCLUDE_DIRS for older VTK (<9) where it is populated.
+  # For VTK 9+, VTK_INCLUDE_DIRS is empty; include dirs are propagated
+  # transitively through the imported VTK module targets in VTK_LIBRARIES.
   target_include_directories(solution PRIVATE ${VTK_INCLUDE_DIRS})
+  target_link_libraries(solution PRIVATE ${VTK_LIBRARIES})
 endif()
 if(GENIUS_ENABLE_CGNS AND CGNS_INCLUDE_DIR)
   target_include_directories(solution PRIVATE ${CGNS_INCLUDE_DIR})
