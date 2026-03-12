@@ -20,4 +20,5 @@ set(CXX_SRCS
 
 add_library(math STATIC ${CXX_SRCS})
 target_include_directories(math PUBLIC ${CMAKE_SOURCE_DIR}/include/math)
+target_link_libraries(math PRIVATE expreval)
 

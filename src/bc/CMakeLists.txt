@@ -8,4 +8,5 @@ set(CXX_SRCS
 
 add_library(bc STATIC ${CXX_SRCS})
 target_include_directories(bc PUBLIC ${CMAKE_SOURCE_DIR}/include/bc)
+target_link_libraries(bc PRIVATE mxml)
 
