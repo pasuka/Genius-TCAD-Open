@@ -1,5 +1,10 @@
 %{
 
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "parser_card.h"
 
 extern int yylineno;
 extern int yylex();
