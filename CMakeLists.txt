@@ -223,6 +223,7 @@ include_directories(
   ${INCLUDE_BASE}/solver/stress_solver
   ${INCLUDE_BASE}/source
   ${INCLUDE_BASE}/utils
+  ${CMAKE_SOURCE_DIR}/src/contrib/ann
   ${CMAKE_SOURCE_DIR}/src/contrib/dfise
   ${CMAKE_SOURCE_DIR}/src/contrib/triangle
   ${CMAKE_SOURCE_DIR}/src/contrib/mxml

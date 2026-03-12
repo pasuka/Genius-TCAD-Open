@@ -40,7 +40,5 @@
 #define WITH_PETSCSCALAR_DOUBLE 1
 #define HAVE_CGNSLIB_H 1
 #define HAVE_CGNS 1
-#define HAVE_VTKCONFIGURE_H 1
-#define HAVE_VTK 1
 
 #endif /* _CONFIG_H_WAF */
