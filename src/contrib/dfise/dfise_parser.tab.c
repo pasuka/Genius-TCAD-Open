@@ -65,6 +65,9 @@
 
 
 
+/* Code required by the parser types.  */
+#include "dfise_block.h"
+
 /* First part of user prologue.  */
 #line 1 "dfise_parser.y"
 
