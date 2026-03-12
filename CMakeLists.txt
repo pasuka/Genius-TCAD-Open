@@ -33,7 +33,10 @@ option(GENIUS_ENABLE_HDF5 "Enable HDF5 support" OFF)
 option(GENIUS_ENABLE_SLEPC "Enable SLEPc support" OFF)
 
 if(GENIUS_ENABLE_VTK)
-  find_package(VTK QUIET)
+  # Request specific components so that VTK 9+ populates VTK_LIBRARIES with
+  # the corresponding imported targets (VTK::IOXML etc.), which in turn expose
+  # the correct include directories via their INTERFACE_INCLUDE_DIRECTORIES.
+  find_package(VTK QUIET COMPONENTS IOXML CommonDataModel CommonCore)
   if(VTK_FOUND)
     message(STATUS "VTK found: ${VTK_VERSION}")
   else()
