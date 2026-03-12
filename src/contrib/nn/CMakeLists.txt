@@ -6,6 +6,6 @@ set(CXX_SRCS
 )
 
 add_library(nn STATIC ${CXX_SRCS})
-target_include_directories(nn PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(nn PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../triangle)
 
 
