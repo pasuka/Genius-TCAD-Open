@@ -223,6 +223,9 @@ include_directories(
   ${INCLUDE_BASE}/solver/stress_solver
   ${INCLUDE_BASE}/source
   ${INCLUDE_BASE}/utils
+  ${CMAKE_SOURCE_DIR}/src/contrib/mxml
+  ${CMAKE_SOURCE_DIR}/src/contrib/trex
+  ${CMAKE_SOURCE_DIR}/src/contrib/nn
   ${PETSc_INCLUDE_DIRS}
   ${MPI_CXX_INCLUDE_DIRS}
 )
