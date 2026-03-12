@@ -57,6 +57,8 @@
 
 #ifndef WIN32
 #  include <unistd.h>
+#else
+#  include <io.h>
 #endif /* !WIN32 */
 #include "mxml-private.h"
 
