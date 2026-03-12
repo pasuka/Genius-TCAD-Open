@@ -22,3 +22,6 @@ add_library(math STATIC ${CXX_SRCS})
 target_include_directories(math PUBLIC ${CMAKE_SOURCE_DIR}/include/math)
 target_link_libraries(math PRIVATE expreval)
 
+# brkpnts.h is generated at build time; ensure it exists before compiling math
+add_dependencies(math generate_brkpnts_h)
+
