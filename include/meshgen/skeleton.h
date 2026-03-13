@@ -120,10 +120,15 @@ struct lt_edge
 {
   bool operator()(const SkeletonEdge &e1, const SkeletonEdge &e2) const
   {
-    unsigned long int space1 = e1.IX*e1.IY;
-    unsigned long int space2 = e2.IX*e2.IY;
-    return (e1.p1[1]*space1 + e1.p1[0] + e1.p2[1]*space1 + e1.p2[0] <
-            e2.p1[1]*space2 + e2.p1[0] + e2.p2[1]*space2 + e2.p2[0]);
+    // Use a lexicographic comparison on (p1_index, p2_index) so that this
+    // is a proper strict weak ordering even when multiple edges share the
+    // same coordinate-sum.  p_index = row * IX + col.
+    unsigned long int key1_p1 = e1.p1[1] * e1.IX + e1.p1[0];
+    unsigned long int key1_p2 = e1.p2[1] * e1.IX + e1.p2[0];
+    unsigned long int key2_p1 = e2.p1[1] * e2.IX + e2.p1[0];
+    unsigned long int key2_p2 = e2.p2[1] * e2.IX + e2.p2[0];
+    if (key1_p1 != key2_p1) return key1_p1 < key2_p1;
+    return key1_p2 < key2_p2;
   }
 };
 
