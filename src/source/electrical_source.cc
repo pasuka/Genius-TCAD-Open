@@ -715,8 +715,10 @@ void  ElectricalSource::SetVSHELL(const Parser::Card &c)
 #ifdef WINDOWS
 
   HINSTANCE hInstLibrary = LoadLibrary(filename.c_str());
+  genius_assert(hInstLibrary);
 
-  void *fp = GetProcAddress(hInstLibrary, funcname.c_str());
+  void *fp = reinterpret_cast<void *>(GetProcAddress(hInstLibrary, funcname.c_str()));
+  genius_assert(fp);
 
   _vsource_list[label] = new VSHELL(label, hInstLibrary, fp, s, V);
 
@@ -922,8 +924,10 @@ void  ElectricalSource::SetISHELL(const Parser::Card &c)
 #ifdef WINDOWS
 
   HINSTANCE hInstLibrary = LoadLibrary(filename.c_str());
+  genius_assert(hInstLibrary);
 
-  void *fp = GetProcAddress(hInstLibrary, funcname.c_str());
+  void *fp = reinterpret_cast<void *>(GetProcAddress(hInstLibrary, funcname.c_str()));
+  genius_assert(fp);
 
   _isource_list[label] = new ISHELL(label, hInstLibrary, fp, s, A);
 
