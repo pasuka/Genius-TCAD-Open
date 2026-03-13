@@ -122,6 +122,31 @@ int MMU::_statistic(char *pidstatus)
 	/* Success */
 	return 0;
 }
+
+#elif defined(WINDOWS) || defined(WIN32)
+
+#include <windows.h>
+#include <psapi.h>
+
+void MMU::measure()
+{
+  PROCESS_MEMORY_COUNTERS pmc;
+  if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
+  {
+    _vmsize  = (int)(pmc.PagefileUsage     / 1024);
+    _vmpeak  = (int)(pmc.PeakPagefileUsage / 1024);
+    _vmrss   = (int)(pmc.WorkingSetSize    / 1024);
+    _vmhwm   = (int)(pmc.PeakWorkingSetSize / 1024);
+  }
+}
+
+#else
+
+void MMU::measure()
+{
+  // Memory measurement not supported on this platform
+}
+
 #endif
 
 

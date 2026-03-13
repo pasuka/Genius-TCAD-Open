@@ -430,9 +430,9 @@ void VTKIO::meshinfo_to_vtk(const MeshBase& mesh, vtkUnstructuredGrid* grid)
     for (unsigned int n=0; n<elem_ids.size(); ++n)
     {
       int id = elem_ids[n];
-      region_info->SetValue(id, elem_region[n]);
-      boundary_info->SetValue(id, elem_boundary[n]);
-      partition_info->SetValue(id, elem_partition[n]);
+      region_info->SetTuple1(id, elem_region[n]);
+      boundary_info->SetTuple1(id, elem_boundary[n]);
+      partition_info->SetTuple1(id, elem_partition[n]);
     }
 
 
@@ -448,9 +448,9 @@ void VTKIO::meshinfo_to_vtk(const MeshBase& mesh, vtkUnstructuredGrid* grid)
     for(int loc=elem_ids.size(); boundary_face_it != boundary_face_order.end(); ++boundary_face_it, ++loc)
     {
       int n = boundary_face_it->second;
-      region_info->SetValue(loc, boundary_elem_region[n]);
-      boundary_info->SetValue(loc, boundary_elem_boundary[n]);
-      partition_info->SetValue(loc, boundary_elem_partition[n]);
+      region_info->SetTuple1(loc, boundary_elem_region[n]);
+      boundary_info->SetTuple1(loc, boundary_elem_boundary[n]);
+      partition_info->SetTuple1(loc, boundary_elem_partition[n]);
     }
 
     _vtk_grid->GetCellData()->AddArray(region_info);
