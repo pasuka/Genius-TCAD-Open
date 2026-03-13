@@ -45,6 +45,7 @@ foreach(_mat ${_material_subdirs})
       ${CMAKE_SOURCE_DIR}/include
       ${CMAKE_SOURCE_DIR}/include/material
     )
+    target_link_libraries(mat_${_mat} PRIVATE material)
     install(TARGETS mat_${_mat}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/genius
     )
