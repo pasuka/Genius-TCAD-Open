@@ -1431,7 +1431,7 @@ yyreduce:
     {
   case 4:
 #line 63 "tif_parser.y"
-                  {(yyval.dval) = double((yyvsp[0].ival));}
+                  {(yyval.dval) = (double)((yyvsp[0].ival));}
 #line 1436 "tif_parser.tab.c"
     break;
 
@@ -1449,7 +1449,7 @@ yyreduce:
 
   case 7:
 #line 68 "tif_parser.y"
-                  {(yyval.ival) = int((yyvsp[0].dval)+0.5);}
+                  {(yyval.ival) = (int)((yyvsp[0].dval)+0.5);}
 #line 1454 "tif_parser.tab.c"
     break;
 

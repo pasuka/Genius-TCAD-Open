@@ -60,12 +60,12 @@ tiffile
 	|	tiffile record
 	;
 
-float   : Integer {$$ = double($1);}
+float   : Integer {$$ = (double)($1);}
 	| Float   {$$ = $1;}
 	;
 
 integer : Integer {$$ = $1;}
-	| Float   {$$ = int($1+0.5);}
+	| Float   {$$ = (int)($1+0.5);}
 	;
 
 solname :  solname String
