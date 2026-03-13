@@ -199,7 +199,25 @@ class Elem :    public DofObject
    * nodes, regardless of how those nodes might be numbered local
    * to the elements.
    */
-  virtual bool operator == (const DofObject& rhs) const;
+  virtual bool operator == (const DofObject& rhs) const
+  {
+    const Elem* rhs_elem = dynamic_cast<const Elem*>(&rhs);
+    if (rhs_elem == NULL) return false;
+    if (this->n_nodes() != rhs_elem->n_nodes()) return false;
+
+    std::vector<unsigned int> lhs_ids(this->n_nodes());
+    std::vector<unsigned int> rhs_ids(rhs_elem->n_nodes());
+
+    for (unsigned int i = 0; i < this->n_nodes(); ++i)
+      lhs_ids[i] = this->node(i);
+    for (unsigned int i = 0; i < rhs_elem->n_nodes(); ++i)
+      rhs_ids[i] = rhs_elem->node(i);
+
+    std::sort(lhs_ids.begin(), lhs_ids.end());
+    std::sort(rhs_ids.begin(), rhs_ids.end());
+
+    return lhs_ids == rhs_ids;
+  }
 
   /**
    * @returns a pointer to the \f$ i^{th} \f$ neighbor of this element.
@@ -522,17 +540,43 @@ class Elem :    public DofObject
    * This method is overloadable since some derived elements
    * might want to use shortcuts to compute their centroid.
    */
-  virtual Point centroid () const;
+  virtual Point centroid () const
+  {
+    Point cp;
+    for (unsigned int n=0; n<this->n_vertices(); n++)
+      cp.add (this->point(n));
+    return (cp /= static_cast<Real>(this->n_vertices()));
+  }
 
   /**
    * @returns the minimum vertex separation for the element.
    */
-  virtual Real hmin () const;
+  virtual Real hmin () const
+  {
+    Real h_min=1.e30;
+    for (unsigned int n_outer=0; n_outer<this->n_vertices(); n_outer++)
+      for (unsigned int n_inner=n_outer+1; n_inner<this->n_vertices(); n_inner++)
+      {
+        const Point diff = (this->point(n_outer) - this->point(n_inner));
+        h_min = std::min(h_min,diff.size());
+      }
+    return h_min;
+  }
 
   /**
    * @returns the maximum vertex separation for the element.
    */
-  virtual Real hmax () const;
+  virtual Real hmax () const
+  {
+    Real h_max=0;
+    for (unsigned int n_outer=0; n_outer<this->n_vertices(); n_outer++)
+      for (unsigned int n_inner=n_outer+1; n_inner<this->n_vertices(); n_inner++)
+      {
+        const Point diff = (this->point(n_outer) - this->point(n_inner));
+        h_max = std::max(h_max,diff.size());
+      }
+    return h_max;
+  }
 
   /**
    * bounding sphere as (centroid, R)
