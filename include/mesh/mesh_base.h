@@ -451,7 +451,7 @@ public:
   /**
    * build the partition cluster, the elems belongs to the same cluster will be partitioned into the same block
    */
-  virtual bool partition_cluster(std::vector<std::vector<unsigned int> > &) {}
+  virtual bool partition_cluster(std::vector<std::vector<unsigned int> > &) { return false; }
 
   /**
    * Returns the number of subdomains in the global mesh. Note that it is
