@@ -360,6 +360,28 @@ unsigned int Elem::key() const
 
 
 
+bool Elem::operator==(const DofObject& rhs) const
+{
+  const Elem* rhs_elem = dynamic_cast<const Elem*>(&rhs);
+  if (rhs_elem == NULL) return false;
+  if (this->n_nodes() != rhs_elem->n_nodes()) return false;
+
+  std::vector<unsigned int> lhs_ids(this->n_nodes());
+  std::vector<unsigned int> rhs_ids(rhs_elem->n_nodes());
+
+  for (unsigned int i = 0; i < this->n_nodes(); ++i)
+    lhs_ids[i] = this->node(i);
+  for (unsigned int i = 0; i < rhs_elem->n_nodes(); ++i)
+    rhs_ids[i] = rhs_elem->node(i);
+
+  std::sort(lhs_ids.begin(), lhs_ids.end());
+  std::sort(rhs_ids.begin(), rhs_ids.end());
+
+  return lhs_ids == rhs_ids;
+}
+
+
+
 Point Elem::centroid() const
 {
   Point cp;
