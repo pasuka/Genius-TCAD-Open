@@ -249,13 +249,13 @@ void MobMonitorHook::node_id_to_vtk()
     //create vtk data array
     vtkIntArray *vtk_node_id_array = vtkIntArray::New();
     vtk_node_id_array->SetName("node");
-    vtk_node_id_array->SetNumberOfValues(n_nodes);
+    vtk_node_id_array->SetNumberOfTuples(n_nodes);
 
     // save data into vtk data array
     for(unsigned int n=0; n<n_nodes; ++n)
     {
       // set scalar value to vtkfloatArray
-      vtk_node_id_array->InsertValue(n, n);
+      vtk_node_id_array->SetTuple1(n, n);
     }
 
     grid->GetPointData()->AddArray(vtk_node_id_array);
@@ -360,13 +360,13 @@ void MobMonitorHook::write_cell_scaler_solution( const std::vector<float> &sol, 
     //create vtk data array
     vtkFloatArray *vtk_sol_array = vtkFloatArray::New();
     vtk_sol_array->SetName(sol_name.c_str());
-    vtk_sol_array->SetNumberOfValues(sol.size());
+    vtk_sol_array->SetNumberOfTuples(sol.size());
 
     // save data into vtk data array
     for(unsigned int n=0; n<sol.size(); ++n)
     {
       // set scalar value to vtkfloatArray
-      vtk_sol_array->InsertValue(n, sol[n]);
+      vtk_sol_array->SetTuple1(n, sol[n]);
     }
 
     grid->GetCellData()->AddArray(vtk_sol_array);
