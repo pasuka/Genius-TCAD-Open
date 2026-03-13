@@ -122,7 +122,7 @@ void CGNSIO::read (const std::string& filename)
     for(int z_id=1; z_id<=Z; z_id++)
     {
       // temporary variable
-      int            isize[3];
+      cgsize_t       isize[3];
 
       // assert the zone type is Unstructured
       {
@@ -160,7 +160,7 @@ void CGNSIO::read (const std::string& filename)
 
       //read the coordinate
       {
-        int  range_min = 1;
+        cgsize_t  range_min = 1;
         genius_assert(!cg_coord_read(fn, B, z_id, "CoordinateX", RealDouble, &range_min, &isize[0], &x[0]));
         genius_assert(!cg_coord_read(fn, B, z_id, "CoordinateY", RealDouble, &range_min, &isize[0], &y[0]));
         genius_assert(!cg_coord_read(fn, B, z_id, "CoordinateZ", RealDouble, &range_min, &isize[0], &z[0]));
@@ -177,7 +177,7 @@ void CGNSIO::read (const std::string& filename)
         char       ArrayName[33];
         DataType_t DataType;
         int        DataDimension;
-        int        DimensionVector;
+        cgsize_t   DimensionVector;
         genius_assert(!cg_array_info(A, ArrayName , &DataType , &DataDimension , &DimensionVector ));
         genius_assert(DataType == Integer);
         genius_assert(DimensionVector==isize[0]);
@@ -205,7 +205,7 @@ void CGNSIO::read (const std::string& filename)
       {
         char           sectionname[33];
         ElementType_t  elemtype;
-        int            range_min = 1;
+        cgsize_t       range_min = 1;
         int            nbndry;
         int            iparent_flag;
         genius_assert(!cg_section_read(fn, B, z_id, S, sectionname, &elemtype, &range_min, &isize[1], &nbndry, &iparent_flag));
@@ -215,11 +215,11 @@ void CGNSIO::read (const std::string& filename)
       //read elements
       std::vector<Elem *>  elem_list;
       {
-        int ElementDataSize;
+        cgsize_t ElementDataSize;
         genius_assert(!cg_ElementDataSize(fn, B, z_id, S, &ElementDataSize));
-        std::vector<int> elem(ElementDataSize);
+        std::vector<cgsize_t> elem(ElementDataSize);
 
-        int  iparentdata;
+        cgsize_t  iparentdata;
         genius_assert(!cg_elements_read(fn, B, z_id, S, &elem[0], &iparentdata));
 #ifdef ENABLE_AMR
         // read the element id and attribute
@@ -237,7 +237,7 @@ void CGNSIO::read (const std::string& filename)
             char       ArrayName[33];
             DataType_t DataType;
             int        DataDimension;
-            int        DimensionVector;
+            cgsize_t   DimensionVector;
 
             genius_assert(!cg_array_info(a, ArrayName , &DataType , &DataDimension , &DimensionVector ));
 
@@ -257,7 +257,7 @@ void CGNSIO::read (const std::string& filename)
           }
         }
 #endif
-        std::vector<int>::const_iterator it = elem.begin();
+        std::vector<cgsize_t>::const_iterator it = elem.begin();
         for(; it != elem.end(); )
           switch(*it++)
           {
