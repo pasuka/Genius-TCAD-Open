@@ -1029,7 +1029,7 @@ void VTKIO::write_node_scaler_solution(const std::vector< std::vector<unsigned i
     for(unsigned int n=0; n<solution.size(); ++n)
     {
       // set scalar value to vtkFloatArray
-      vtk_sol_array->InsertValue(n, solution[n]);
+      vtk_sol_array->SetTuple1(n, solution[n]);
     }
 
     grid->GetPointData()->AddArray(vtk_sol_array);
@@ -1094,8 +1094,8 @@ void VTKIO::write_node_complex_solution(const std::vector< std::vector<unsigned 
     {
       std::complex<float> data(solution_real[n], solution_imag[n]);
       // set scalar value to vtkFloatArray
-      vtk_sol_array_magnitude->InsertValue(n, std::abs(data));
-      vtk_sol_array_angle->InsertValue(n, std::arg(data));
+      vtk_sol_array_magnitude->SetTuple1(n, std::abs(data));
+      vtk_sol_array_angle->SetTuple1(n, std::arg(data));
     }
 
     grid->GetPointData()->AddArray(vtk_sol_array_magnitude);
@@ -1205,7 +1205,7 @@ void VTKIO::write_cell_scaler_solution(const std::vector<unsigned int> & order, 
     for(unsigned int n=0; n<order.size(); ++n)
     {
       // set scalar value to vtkFloatArray
-      vtk_sol_array->InsertValue(n, sol_re_order[n]);
+      vtk_sol_array->SetTuple1(n, sol_re_order[n]);
     }
 
     grid->GetCellData()->AddArray(vtk_sol_array);
