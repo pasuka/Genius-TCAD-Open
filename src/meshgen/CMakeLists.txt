@@ -13,4 +13,5 @@ target_include_directories(meshgen PUBLIC
   ${CMAKE_SOURCE_DIR}/include/meshgen
   ${CMAKE_SOURCE_DIR}/src/contrib/triangle
 )
+target_link_libraries(meshgen PRIVATE triangle)
 

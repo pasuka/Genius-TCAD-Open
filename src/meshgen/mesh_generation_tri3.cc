@@ -1043,7 +1043,14 @@ int MeshGeneratorTri3::do_mesh()
     Parser::Card c = _decks.get_current_card();
 
     if(c.key() == "MESH")      // It's a MESH card
+    {
       tri_cmd = c.get_string("triangle", "pzADYQ");
+      // Regional attributes ('A' flag) are required to assign subdomain IDs.
+      // Always add the flag when it is absent so that triangulate() fills
+      // out.triangleattributelist even if the user omitted it.
+      if(tri_cmd.find('A') == std::string::npos)
+        tri_cmd += 'A';
+    }
 
     if(c.key() == "X.MESH")   // It's a X.MESH card
       if(set_x_line(c)) return 1;
@@ -1103,7 +1110,14 @@ int MeshGeneratorTri3::do_mesh()
   triangulateio_init();
 
   // call triangle to generate 2D mesh on xy plane
-  triangle_mesh();
+  if( triangle_mesh() )
+  {
+    MESSAGE<<"ERROR: triangle_mesh() failed. Check that all regions have interior points, "
+             "that segment constraints are consistent, and that the 'triangle' command "
+             "parameters in the MESH card are valid.\n";
+    RECORD();
+    return 1;
+  }
 
 
   // fill the _mesh structure
@@ -1129,7 +1143,12 @@ int MeshGeneratorTri3::do_mesh()
     elem->set_node(0) = _mesh.node_ptr( out.trianglelist[3*i+0] );
     elem->set_node(1) = _mesh.node_ptr( out.trianglelist[3*i+1] );
     elem->set_node(2) = _mesh.node_ptr( out.trianglelist[3*i+2] );
-    elem->subdomain_id() = static_cast<int>(out.triangleattributelist[i]+0.5);
+    // Defensive guard: triangleattributelist should be non-NULL whenever the
+    // 'A' flag is active (enforced above) and at least one region is defined.
+    // Fall back to subdomain 0 to avoid a NULL-dereference SIGSEGV in edge
+    // cases such as zero triangles or a Triangle library mismatch.
+    elem->subdomain_id() = (out.triangleattributelist != NULL) ?
+      static_cast<int>(out.triangleattributelist[i]+0.5) : 0;
 
     int bc_index;
 
@@ -1432,7 +1451,11 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
     elem->set_node(1) = _mesh.node_ptr( out.trianglelist[3*i+1] );
     elem->set_node(2) = _mesh.node_ptr( out.trianglelist[3*i+2] );
 
-    elem->subdomain_id() = static_cast<int>(out.triangleattributelist[i]+0.5);
+    // Defensive guard: triangleattributelist should be non-NULL whenever the
+    // 'A' flag is active and at least one region is defined.  Fall back to
+    // subdomain 0 to avoid a NULL-dereference SIGSEGV in edge cases.
+    elem->subdomain_id() = (out.triangleattributelist != NULL) ?
+      static_cast<int>(out.triangleattributelist[i]+0.5) : 0;
 
     int bc_index;
 
