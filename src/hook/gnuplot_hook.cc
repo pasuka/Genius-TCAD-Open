@@ -27,6 +27,7 @@
 
 #include "config.h"
 #ifdef WINDOWS
+#include <io.h>      // for windows _access function
 #else
 #include <unistd.h>
 #endif
