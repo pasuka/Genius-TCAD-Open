@@ -228,6 +228,7 @@ include_directories(
   ${INCLUDE_BASE}/utils
   ${CMAKE_SOURCE_DIR}/src/contrib/ann
   ${CMAKE_SOURCE_DIR}/src/contrib/dfise
+  ${CMAKE_SOURCE_DIR}/src/contrib/kdtree
   ${CMAKE_SOURCE_DIR}/src/contrib/expreval
   ${CMAKE_SOURCE_DIR}/src/contrib/triangle
   ${CMAKE_SOURCE_DIR}/src/contrib/mxml
