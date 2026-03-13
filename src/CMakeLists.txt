@@ -58,6 +58,15 @@ set(_genius_core_libs
   trex
 )
 
+# On GCC/MinGW the linker is single-pass by default, which causes link
+# failures when static libraries have circular dependencies (e.g. bc <->
+# solver).  Wrapping the core library list in --start-group/--end-group
+# instructs the linker to rescan the group until all symbols are resolved.
+if(NOT MSVC AND NOT APPLE)
+  list(PREPEND _genius_core_libs -Wl,--start-group)
+  list(APPEND  _genius_core_libs -Wl,--end-group)
+endif()
+
 target_link_libraries(genius PRIVATE
   ${_genius_core_libs}
   MPI::MPI_CXX

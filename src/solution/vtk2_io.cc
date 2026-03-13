@@ -48,7 +48,6 @@
 #include "vtkVersion.h"
 #include "vtkIntArray.h"
 #include "vtkFloatArray.h"
-#include "vtkDoubleArray.h"
 #include "vtkPointData.h"
 
 #endif //HAVE_VTK
@@ -425,9 +424,9 @@ void VTK2IO::meshinfo_to_vtk(const MeshBase& mesh)
     for (unsigned int n=0; n<elem_ids.size(); ++n)
     {
       int id = elem_ids[n];
-      region_info->SetValue(id, elem_region[n]);
-      boundary_info->SetValue(id, elem_boundary[n]);
-      partition_info->SetValue(id, elem_partition[n]);
+      region_info->SetTuple1(id, elem_region[n]);
+      boundary_info->SetTuple1(id, elem_boundary[n]);
+      partition_info->SetTuple1(id, elem_partition[n]);
     }
 
 
@@ -443,9 +442,9 @@ void VTK2IO::meshinfo_to_vtk(const MeshBase& mesh)
     for(int loc=elem_ids.size(); boundary_face_it != boundary_face_order.end(); ++boundary_face_it, ++loc)
     {
       int n = boundary_face_it->second;
-      region_info->SetValue(loc, boundary_elem_region[n]);
-      boundary_info->SetValue(loc, boundary_elem_boundary[n]);
-      partition_info->SetValue(loc, boundary_elem_partition[n]);
+      region_info->SetTuple1(loc, boundary_elem_region[n]);
+      boundary_info->SetTuple1(loc, boundary_elem_boundary[n]);
+      partition_info->SetTuple1(loc, boundary_elem_partition[n]);
     }
 
     _vtk_grid->GetCellData()->AddArray(region_info);
@@ -782,7 +781,7 @@ void VTK2IO::write_node_solution_scalar(const std::string & sol_name, const std:
     for(unsigned int n=0; n<sol.size(); ++n)
     {
       // set scalar value to vtkFloatArray
-      vtk_sol_array->InsertValue(n, (sol[n]));
+      vtk_sol_array->SetTuple1(n, (sol[n]));
     }
 
     _vtk_grid->GetPointData()->AddArray(vtk_sol_array);
@@ -836,8 +835,8 @@ void VTK2IO::write_node_solution_complex(const std::string & sol_name, const std
     for(unsigned int n=0; n<sol.size(); ++n)
     {
       // set scalar value to vtkFloatArray
-      vtk_sol_array_real->InsertValue(n, (sol[n].real()));
-      vtk_sol_array_imag->InsertValue(n, (sol[n].imag()));
+      vtk_sol_array_real->SetTuple1(n, (sol[n].real()));
+      vtk_sol_array_imag->SetTuple1(n, (sol[n].imag()));
     }
 
     _vtk_grid->GetPointData()->AddArray(vtk_sol_array_real);
@@ -978,7 +977,7 @@ void VTK2IO::write_node_solution_scalar(const std::string & sol_name, std::vecto
     for(unsigned int n=0; n<sol_value.size(); ++n)
     {
       // set scalar value to vtkFloatArray
-      vtk_sol_array->InsertValue(n, (sol_value[n]));
+      vtk_sol_array->SetTuple1(n, (sol_value[n]));
     }
 
     _vtk_grid->GetPointData()->AddArray(vtk_sol_array);
