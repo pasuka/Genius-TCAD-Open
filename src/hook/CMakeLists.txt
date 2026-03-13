@@ -64,6 +64,14 @@ foreach(_src ${_hook_srcs})
     target_include_directories(${_name} PRIVATE ${CGNS_INCLUDE_DIR})
     target_link_libraries(${_name} PRIVATE ${CGNS_LIBRARY})
   endif()
+  # On Windows/MinGW, DLLs must have all symbol references resolved at link
+  # time.  Link each hook plugin against the genius executable import library
+  # so that symbols from the core libraries (e.g. Elem vtable entries) are
+  # available.  ENABLE_EXPORTS on the genius target causes CMake/MinGW to
+  # produce that import library automatically.
+  if(WIN32)
+    target_link_libraries(${_name} PRIVATE genius)
+  endif()
   install(TARGETS ${_name}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/genius
   )

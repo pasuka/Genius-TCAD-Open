@@ -3,7 +3,6 @@ add_subdirectory(base)
 add_subdirectory(bc)
 add_subdirectory(fe)
 add_subdirectory(geom)
-add_subdirectory(hook)
 add_subdirectory(interpolation)
 add_subdirectory(material)
 add_subdirectory(math)
@@ -86,6 +85,16 @@ endif()
 if(GENIUS_ENABLE_HDF5 AND HDF5_FOUND)
   target_link_libraries(genius PRIVATE ${HDF5_LIBRARIES})
 endif()
+
+# On Windows, export all symbols from the genius executable so that hook
+# MODULE libraries (plugins) can import them when loaded at runtime.
+if(WIN32)
+  set_target_properties(genius PROPERTIES ENABLE_EXPORTS TRUE)
+endif()
+
+# Hook plugin MODULE libraries must be added after the genius executable is
+# defined so that on Windows they can link against its import library.
+add_subdirectory(hook)
 
 # ── Install rules ────────────────────────────────────────────────────────────
 
