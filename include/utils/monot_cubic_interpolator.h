@@ -140,7 +140,7 @@ public:
 
      @return f(x) for a given x
   */
-  double evaluate(double x) const throw(const char*);
+  double evaluate(double x) const;
 
   /**
      @param x x value
@@ -193,7 +193,7 @@ public:
      @return x value corresponding to maximum f value
      @return maximum f value
   */
-  std::pair<double,double> getMaximumF() const throw(const char*) ;
+  std::pair<double,double> getMaximumF() const;
 
   /**
      Minimum f-value, returns both x and f in a pair
@@ -201,7 +201,7 @@ public:
      @return x value corresponding to minimal f value
      @return minimum f value
   */
-  std::pair<double,double> getMinimumF() const throw(const char*)  ;
+  std::pair<double,double> getMinimumF() const;
 
 
   /**

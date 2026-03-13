@@ -42,7 +42,7 @@ WaveformShell::WaveformShell(const std::string & s, const std::string & dll_file
 #ifdef WINDOWS
 
   dll = LoadLibrary(dll_file.c_str());
-  void *fp = GetProcAddress(dll, function.c_str());
+  void *fp = reinterpret_cast<void *>(GetProcAddress(dll, function.c_str()));
 
 #else
 
