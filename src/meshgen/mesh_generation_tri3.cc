@@ -25,6 +25,7 @@
 // C++ includes
 #include <cmath> // for std::sqrt
 #include <cstdlib>
+#include <cstring> // for memset
 
 // Local includes
 #include "genius_env.h"
@@ -48,21 +49,10 @@
 void MeshGeneratorTri3::triangulateio_init()
 {
 #ifdef __triangle_h__
-  // init Triangle io structure.
-  in.pointlist = (double *) NULL;
-  in.pointattributelist = (double *) NULL;
-  in.pointmarkerlist = (int *) NULL;
-  in.segmentlist = (int *) NULL;
-  in.segmentmarkerlist = (int *) NULL;
-  in.regionlist = (double *)NULL;
-
-  out.pointlist = (double *) NULL;
-  out.pointattributelist = (double *) NULL;
-  out.pointmarkerlist = (int *) NULL;
-  out.trianglelist = (int *) NULL;
-  out.triangleattributelist = (double *) NULL;
-  out.segmentlist = (int *) NULL;
-  out.segmentmarkerlist = (int *) NULL;
+  // Zero-initialize all fields of the Triangle I/O structures so that
+  // unset number/pointer fields are NULL/0 rather than garbage.
+  memset(&in,  0, sizeof(in));
+  memset(&out, 0, sizeof(out));
 #else
 
 
@@ -382,7 +372,7 @@ int  MeshGeneratorTri3::make_region_segment()
     {
       edge.p1[0] = i++;
       edge.p1[1] = region_array1d[r].iymax;
-      while( point_array3d[0][region_array1d[r].iymax][i].eliminated ) i++;
+      while( i<IX && point_array3d[0][region_array1d[r].iymax][i].eliminated ) i++;
       edge.p2[0] = i;
       edge.p2[1] = region_array1d[r].iymax;
       edge_table[edge] =  (r+1);
@@ -392,7 +382,7 @@ int  MeshGeneratorTri3::make_region_segment()
     {
       edge.p1[0] = i++;
       edge.p1[1] = region_array1d[r].iymin;
-      while( point_array3d[0][region_array1d[r].iymin][i].eliminated ) i++;
+      while( i<IX && point_array3d[0][region_array1d[r].iymin][i].eliminated ) i++;
       edge.p2[0] = i;
       edge.p2[1] = region_array1d[r].iymin;
       edge_table[edge] =  (r+1);
@@ -402,7 +392,7 @@ int  MeshGeneratorTri3::make_region_segment()
     {
       edge.p1[0] = region_array1d[r].ixmin;
       edge.p1[1] = i++;
-      while( point_array3d[0][i][region_array1d[r].ixmin].eliminated ) i++;
+      while( i<IY && point_array3d[0][i][region_array1d[r].ixmin].eliminated ) i++;
       edge.p2[0] = region_array1d[r].ixmin;
       edge.p2[1] = i;
       // is it the global left line
@@ -413,7 +403,7 @@ int  MeshGeneratorTri3::make_region_segment()
     {
       edge.p1[0] = region_array1d[r].ixmax;
       edge.p1[1] = i++;
-      while( point_array3d[0][i][region_array1d[r].ixmax].eliminated ) i++;
+      while( i<IY && point_array3d[0][i][region_array1d[r].ixmax].eliminated ) i++;
       edge.p2[0] = region_array1d[r].ixmax;
       edge.p2[1] = i;
       edge_table[edge] =  (r+1);
@@ -454,7 +444,7 @@ int  MeshGeneratorTri3::make_face(int ixmin,int ixmax,int iymin,int iymax, const
     {
       edge.p1[0]=i++;
       edge.p1[1]=iymax;
-      while(point_array3d[0][iymax][i].eliminated) i++;
+      while(static_cast<unsigned int>(i)<IX && point_array3d[0][iymax][i].eliminated) i++;
       edge.p2[0]=i;
       edge.p2[1]=iymax;
       edge_table[edge]=face_mark;
@@ -467,7 +457,7 @@ int  MeshGeneratorTri3::make_face(int ixmin,int ixmax,int iymin,int iymax, const
     {
       edge.p1[0]=ixmin;
       edge.p1[1]=i++;
-      while(point_array3d[0][i][ixmin].eliminated) i++;
+      while(static_cast<unsigned int>(i)<IY && point_array3d[0][i][ixmin].eliminated) i++;
       edge.p2[0]=ixmin;
       edge.p2[1]=i;
       edge_table[edge]=face_mark;
@@ -966,6 +956,13 @@ int MeshGeneratorTri3::triangle_mesh()
   double *pregionlist =  in.regionlist;
   for(int i=0;i<in.numberofregions;i++)
   {
+    if(region_array1d[i].px.empty() || region_array1d[i].py.empty())
+    {
+      MESSAGE<<"ERROR at triangle_mesh(): Region " << region_array1d[i].label
+              << " contains no interior points. Check region bounds.\n";
+      RECORD();
+      return 1;
+    }
     *pregionlist++ = region_array1d[i].px[0];
     *pregionlist++ = region_array1d[i].py[0];
     *pregionlist++ = double(i);
@@ -1332,6 +1329,13 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
     double *pregionlist =  in.regionlist;
     for(int i=0; i<in.numberofregions; i++)
     {
+      if(region_point[i].empty())
+      {
+        MESSAGE<<"ERROR at do_refine(): Region " << _mesh.subdomain_label_by_id(i)
+                << " has no elements to determine an interior point.\n";
+        RECORD();
+        return 1;
+      }
       *pregionlist++ = (region_point[i])[0](0);
       *pregionlist++ = (region_point[i])[0](1);
       *pregionlist++ = double(i);
