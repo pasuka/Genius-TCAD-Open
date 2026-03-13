@@ -71,15 +71,16 @@ foreach(_src ${_hook_srcs})
   # produce that import library automatically.
   if(WIN32)
     target_link_libraries(${_name} PRIVATE genius)
-    # DoseRate is defined in utils but is only referenced by these hooks, so
-    # the linker never pulls dose_rate.o into the genius executable and
-    # therefore its symbols are absent from libgenius.dll.a.  Compile
-    # dose_rate.cc directly into each hook that needs it to satisfy those
-    # references.
+    # DoseRate and OcTree are defined in utils but are only referenced by
+    # these hooks, so the linker never pulls dose_rate.o/octree.o into the
+    # genius executable and therefore their symbols are absent from
+    # libgenius.dll.a.  Compile dose_rate.cc and octree.cc directly into
+    # each hook that needs them to satisfy those references.
     if("${_name}" STREQUAL "particle_capture_data_hook" OR
        "${_name}" STREQUAL "particle_capture_g4_hook")
       target_sources(${_name} PRIVATE
         ${CMAKE_SOURCE_DIR}/src/utils/dose_rate.cc
+        ${CMAKE_SOURCE_DIR}/src/utils/octree.cc
       )
     endif()
   endif()
