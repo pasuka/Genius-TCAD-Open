@@ -242,3 +242,4 @@ stress_solver/stress_solver.cc
 
 add_library(solver STATIC ${CXX_SRCS})
 target_include_directories(solver PUBLIC ${CMAKE_SOURCE_DIR}/include/solver)
+target_link_libraries(solver PRIVATE spline)
