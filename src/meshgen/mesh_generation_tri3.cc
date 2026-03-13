@@ -977,23 +977,31 @@ int MeshGeneratorTri3::triangle_mesh()
 #endif
   // set boundary mark to output edge
   out_edge_table.clear();
-  for(int i=0; i<out.numberofsegments; i++)
+  // Guard against NULL segment arrays: Triangle may not populate these when
+  // there are no constrained segments in the output (e.g. degenerate input).
+  if (out.segmentlist != NULL && out.segmentmarkerlist != NULL)
   {
-    OutEdge edge;
-    edge.pointno = out.numberofpoints;
-    if(out.segmentlist[2*i+0] < out.segmentlist[2*i+1])
+    for(int i=0; i<out.numberofsegments; i++)
     {
-      edge.p1 = out.segmentlist[2*i+0];
-      edge.p2 = out.segmentlist[2*i+1];
+      OutEdge edge;
+      edge.pointno = out.numberofpoints;
+      if(out.segmentlist[2*i+0] < out.segmentlist[2*i+1])
+      {
+        edge.p1 = out.segmentlist[2*i+0];
+        edge.p2 = out.segmentlist[2*i+1];
+      }
+      else
+      {
+        edge.p1 = out.segmentlist[2*i+1];
+        edge.p2 = out.segmentlist[2*i+0];
+      }
+      edge.mark = out.segmentmarkerlist[i];
+      out_edge_table[edge] = edge.mark;
     }
-    else
-    {
-      edge.p1 = out.segmentlist[2*i+1];
-      edge.p2 = out.segmentlist[2*i+0];
-    }
-    edge.mark = out.segmentmarkerlist[i];
-    out_edge_table[edge] = edge.mark;
-
+  }
+  else
+  {
+    out.numberofsegments = 0;
   }
 
   return 0;
@@ -1119,6 +1127,19 @@ int MeshGeneratorTri3::do_mesh()
     return 1;
   }
 
+
+  // Verify that Triangle produced non-empty, valid output before touching
+  // the output arrays.  NULL pointlist/trianglelist would cause SIGSEGV.
+  if (out.numberofpoints <= 0 || out.pointlist == NULL ||
+      out.numberoftriangles <= 0 || out.trianglelist == NULL)
+  {
+    MESSAGE<<"ERROR: Triangle library returned an empty or invalid mesh "
+             "(numberofpoints=" << out.numberofpoints
+           << ", numberoftriangles=" << out.numberoftriangles << ").\n";
+    RECORD();
+    triangulateio_finalize();
+    return 1;
+  }
 
   // fill the _mesh structure
   _mesh.magic_num() = this->magic_num();
@@ -1410,22 +1431,30 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
 
   // set boundary mark to output edge
   out_edge_table.clear();
-  for(int i=0; i<out.numberofsegments; i++)
+  // Guard against NULL segment arrays in the same way as triangle_mesh().
+  if (out.segmentlist != NULL && out.segmentmarkerlist != NULL)
   {
-    OutEdge edge;
-    edge.pointno = out.numberofpoints;
-    if(out.segmentlist[2*i+0] < out.segmentlist[2*i+1])
+    for(int i=0; i<out.numberofsegments; i++)
     {
-      edge.p1 = out.segmentlist[2*i+0];
-      edge.p2 = out.segmentlist[2*i+1];
+      OutEdge edge;
+      edge.pointno = out.numberofpoints;
+      if(out.segmentlist[2*i+0] < out.segmentlist[2*i+1])
+      {
+        edge.p1 = out.segmentlist[2*i+0];
+        edge.p2 = out.segmentlist[2*i+1];
+      }
+      else
+      {
+        edge.p1 = out.segmentlist[2*i+1];
+        edge.p2 = out.segmentlist[2*i+0];
+      }
+      edge.mark = out.segmentmarkerlist[i];
+      out_edge_table[edge] = edge.mark;
     }
-    else
-    {
-      edge.p1 = out.segmentlist[2*i+1];
-      edge.p2 = out.segmentlist[2*i+0];
-    }
-    edge.mark = out.segmentmarkerlist[i];
-    out_edge_table[edge] = edge.mark;
+  }
+  else
+  {
+    out.numberofsegments = 0;
   }
 
 
@@ -1438,6 +1467,17 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
   // Build the nodes.
   _mesh.reserve_nodes( out.numberofpoints );
   _mesh.reserve_elem( out.numberoftriangles );
+
+  if (out.numberofpoints <= 0 || out.pointlist == NULL ||
+      out.numberoftriangles <= 0 || out.trianglelist == NULL)
+  {
+    MESSAGE<<"ERROR: Triangle library returned an empty or invalid mesh during regrid "
+             "(numberofpoints=" << out.numberofpoints
+           << ", numberoftriangles=" << out.numberoftriangles << ").\n";
+    RECORD();
+    triangulateio_finalize();
+    return 1;
+  }
 
   for(int i = 0; i < out.numberofpoints; i++)
     _mesh.add_point(Point(out.pointlist[2*i+0], out.pointlist[2*i+1], 0.0));
