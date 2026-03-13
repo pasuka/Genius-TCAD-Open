@@ -97,8 +97,16 @@ endif()
 
 # On Windows, export all symbols from the genius executable so that hook
 # MODULE libraries (plugins) can import them when loaded at runtime.
+# ENABLE_EXPORTS instructs CMake to generate an import library (libgenius.dll.a)
+# for the executable.  On MinGW/GCC, --export-all-symbols is required so that
+# every symbol pulled in from the static component libraries (e.g. Elem vtable
+# entries, DofObject::invalid_id, adtl::AutoDScalar::numdir, etc.) is placed
+# into that import library and can therefore be resolved by hook MODULE plugins.
 if(WIN32)
   set_target_properties(genius PROPERTIES ENABLE_EXPORTS TRUE)
+  if(NOT MSVC)
+    target_link_options(genius PRIVATE -Wl,--export-all-symbols)
+  endif()
 endif()
 
 # Hook plugin MODULE libraries must be added after the genius executable is
