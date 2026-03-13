@@ -10,13 +10,19 @@ BISON_TARGET(TifParser
 )
 ADD_FLEX_BISON_DEPENDENCY(TifLexer TifParser)
 
-set(CXX_SRCS
+# The generated lex/parser files are #included by tif_tool.cc inside namespace TIF.
+# Mark them as header-only so CMake does not compile them as separate translation units,
+# which would cause duplicate-symbol errors and break the namespace encapsulation.
+set_source_files_properties(
   ${FLEX_TifLexer_OUTPUTS}
   ${BISON_TifParser_OUTPUTS}
-  tif_tool.cc
+  PROPERTIES HEADER_FILE_ONLY TRUE
 )
 
-add_library(tif STATIC ${CXX_SRCS})
+add_library(tif STATIC tif_tool.cc)
+# Still list the generated files as sources so CMake tracks them as dependencies
+# and includes them in IDE project files, even though they are not compiled separately.
+target_sources(tif PRIVATE ${FLEX_TifLexer_OUTPUTS} ${BISON_TifParser_OUTPUTS})
 target_include_directories(tif PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
