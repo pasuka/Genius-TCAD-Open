@@ -10,6 +10,7 @@ set(CXX_SRCS
 
 add_library(material STATIC ${CXX_SRCS})
 target_include_directories(material PUBLIC ${CMAKE_SOURCE_DIR}/include/material)
+target_link_libraries(material PUBLIC parser)
 
 # Material plugin subdirectories — each built as a MODULE library (loaded at runtime)
 set(_material_subdirs
