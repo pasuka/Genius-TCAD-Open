@@ -1328,7 +1328,7 @@ void CGNSIO::write (const std::string& filename)
         const BoundaryCondition * bc = bcs->get_bc_by_bd_id(bd_id);
 
         // collect boundary nodes
-        std::vector<int> bd_point;
+        std::vector<cgsize_t> bd_point;
         {
           const std::set<const Node *> & bd_nodes = boundary_side_nodes_id_map.find(bd_id)->second;
           for(std::set<const Node *>::const_iterator it=bd_nodes.begin(); it!=bd_nodes.end(); ++it)
