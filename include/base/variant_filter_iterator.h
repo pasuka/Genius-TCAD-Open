@@ -47,17 +47,20 @@
  * @author John W. Peterson, 2004.
  */
 template<class Predicate, class Type, class ReferenceType = Type&, class PointerType = Type*>
-#if defined(__GNUC__) && (__GNUC__ < 3)  && !defined(__INTEL_COMPILER)
-class variant_filter_iterator : public std::forward_iterator<std::forward_iterator_tag, Type>
-#else
-class variant_filter_iterator : public std::iterator<std::forward_iterator_tag,  Type>
-#endif
+class variant_filter_iterator
 {
 public:
   /**
    * Shortcut name for the fully-qualified typename.
    */
   typedef variant_filter_iterator<Predicate, Type, ReferenceType, PointerType> Iterator;
+
+  // Iterator traits
+  typedef std::forward_iterator_tag iterator_category;
+  typedef Type                      value_type;
+  typedef std::ptrdiff_t            difference_type;
+  typedef PointerType               pointer;
+  typedef ReferenceType             reference;
 
 
 
