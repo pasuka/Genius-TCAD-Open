@@ -24,6 +24,7 @@
 
 // C++ includes
 #include <algorithm>
+#include <numeric>
 #include <set>
 #include <vector>
 
@@ -581,7 +582,15 @@ class Elem :    public DofObject
   /**
    * bounding sphere as (centroid, R)
    */
-  virtual std::pair<Point, Real> bounding_sphere() const;
+  virtual std::pair<Point, Real> bounding_sphere() const
+  {
+    Point cp = centroid();
+    Real  R=0;
+    for (unsigned int n=0; n<this->n_vertices(); n++)
+      R = std::max(R, (cp-this->point(n)).size() );
+
+    return std::make_pair(cp, (1+1e-6)*R);
+  }
 
   /**
    * @return the gradient of input variable in the cell,
@@ -623,12 +632,36 @@ class Elem :    public DofObject
   /**
    * @return the interpolated value at given point
    */
-  virtual PetscScalar interpolation( const std::vector<PetscScalar> & , const Point &) const;
+  virtual PetscScalar interpolation( const std::vector<PetscScalar> & value, const Point &p) const
+  {
+    genius_assert(value.size() == this->n_nodes());
+
+    PetscScalar v = 0.0;
+    std::vector<Real> w(this->n_nodes());
+    for(unsigned int n=0; n<this->n_nodes(); ++n)
+    {
+      w[n] = 1.0/((p - this->point(n)).size_sq()+1e-6);
+      v += w[n]*value[n];
+    }
+    return v/std::accumulate(w.begin(), w.end(), 0.0);
+  }
 
   /**
    * @return the interpolated value at given point
    */
-  virtual AutoDScalar interpolation( const std::vector<AutoDScalar> & , const Point &) const;
+  virtual AutoDScalar interpolation( const std::vector<AutoDScalar> & value, const Point &p) const
+  {
+    genius_assert(value.size() == this->n_nodes());
+
+    AutoDScalar v = 0.0;
+    std::vector<Real> w(this->n_nodes());
+    for(unsigned int n=0; n<this->n_nodes(); ++n)
+    {
+      w[n] = 1.0/((p - this->point(n)).size_sq()+1e-6);
+      v += w[n]*value[n];
+    }
+    return v/std::accumulate(w.begin(), w.end(), 0.0);
+  }
 
   /**
    * @return the (length/area/volume) of the geometric element.
