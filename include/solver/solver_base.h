@@ -35,7 +35,7 @@
 
 #include "mxml.h"
 
-#ifndef WINDOWS
+#ifdef DLLHOOK
   #include "dlhook.h"
 #endif
 

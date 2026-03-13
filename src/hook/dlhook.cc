@@ -26,15 +26,40 @@
 
 #ifdef DLLHOOK
 
+#ifdef WINDOWS
+#include <windows.h>
+#else
 #include <dlfcn.h>
+#endif
 
 DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
 :Hook(solver, name), dll_handle(0), hook(0)
 {
-  char * error;
-
   std::string genius_dir(Genius::genius_dir());
   std::string filename =  genius_dir + "/lib/" + name + ".so";
+
+#ifdef WINDOWS
+  // Use Windows LoadLibrary to load the hook DLL
+  dll_handle = (void *) LoadLibraryA(filename.c_str());
+  if(!dll_handle)
+  {
+    DWORD err = GetLastError();
+    std::cerr << "Load hook failed: Windows error code " << err << std::endl;
+    return;
+  }
+
+  // get the address of function get_hook in the dll file
+  get_hook = (GET_HOOK *) GetProcAddress((HMODULE)dll_handle, "get_hook");
+  if(!get_hook)
+  {
+    DWORD err = GetLastError();
+    std::cerr << "Load hook failed: Windows error code " << err << std::endl;
+    FreeLibrary((HMODULE)dll_handle);
+    dll_handle = NULL;
+    return;
+  }
+#else
+  char * error;
 
   // Get 'dlopen()' handle to the extension function
 #ifdef RTLD_DEEPBIND
@@ -59,6 +84,7 @@ DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
     dll_handle = NULL;
     return;
   }
+#endif
 
   // call it to get the real hook pointer
   hook = (*get_hook)(_solver, _name, fun_data);
@@ -71,7 +97,11 @@ DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
 DllHook::~DllHook()
 {
   if(hook) delete hook;
-  if ( dll_handle ) dlclose( dll_handle );
+#ifdef WINDOWS
+  if(dll_handle) FreeLibrary((HMODULE)dll_handle);
+#else
+  if(dll_handle) dlclose(dll_handle);
+#endif
 }
 
 #endif
