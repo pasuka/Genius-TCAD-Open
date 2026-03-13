@@ -180,7 +180,7 @@ read(const std::string & datafilename, int xColumn, int fColumn)
 
 void
 MonotCubicInterpolator::
-addPair(double newx, double newf) throw(const char*)
+addPair(double newx, double newf)
 {
 #if 0
   if (isnan(newx) || isinf(newx) || isnan(newf) || isinf(newf))
@@ -199,7 +199,7 @@ addPair(double newx, double newf) throw(const char*)
 
 double
 MonotCubicInterpolator::
-evaluate(double x) const throw(const char*)
+evaluate(double x) const
 {
 #if 0
   if (isnan(x) || isinf(x))
@@ -333,7 +333,7 @@ toString() const
 
 pair<double,double>
 MonotCubicInterpolator::
-getMissingX() const throw(const char*)
+getMissingX() const
 {
   if( data.size() < 2)
   {
@@ -370,7 +370,7 @@ getMissingX() const throw(const char*)
 
 pair<double,double>
 MonotCubicInterpolator::
-getMaximumF() const throw(const char*)
+getMaximumF() const
 {
   if (data.size() <= 1)
   {
@@ -398,7 +398,7 @@ getMaximumF() const throw(const char*)
 
 pair<double,double>
 MonotCubicInterpolator::
-getMinimumF() const throw(const char*)
+getMinimumF() const
 {
   if (data.size() <= 1)
   {

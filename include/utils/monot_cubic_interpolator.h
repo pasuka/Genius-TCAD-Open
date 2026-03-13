@@ -365,7 +365,7 @@ public:
      must be exploited.
 
   */
-  void addPair(double newx, double newf) throw(const char*);
+  void addPair(double newx, double newf);
 
   /**
      Returns an x-value that is believed to yield the best
@@ -379,7 +379,7 @@ public:
      @return New x value beleived to yield the best improvement in global accuracy
      @return Maximal difference
   */
-  std::pair<double,double> getMissingX() const throw(const char*) ;
+  std::pair<double,double> getMissingX() const;
 
   /**
      Constructs a string containing the data in a table
