@@ -633,20 +633,20 @@ void DDMMonitorHook::meshinfo_to_vtk()
     vtkIntArray *partition_info  = vtkIntArray::New();
 
     region_info->SetName("region");
-    region_info->SetNumberOfValues(n_elems);
+    region_info->SetNumberOfTuples(n_elems);
 
     boundary_info->SetName("boundary");
-    boundary_info->SetNumberOfValues(n_elems);
+    boundary_info->SetNumberOfTuples(n_elems);
 
     partition_info->SetName("partition");
-    partition_info->SetNumberOfValues(n_elems);
+    partition_info->SetNumberOfTuples(n_elems);
 
     for (unsigned int n=0; n<elem_ids.size(); ++n)
     {
       int id = elem_ids[n];
-      region_info->SetValue(id, elem_region[n]);
-      boundary_info->SetValue(id, elem_boundary[n]);
-      partition_info->SetValue(id, elem_partition[n]);
+      region_info->SetTuple1(id, elem_region[n]);
+      boundary_info->SetTuple1(id, elem_boundary[n]);
+      partition_info->SetTuple1(id, elem_partition[n]);
     }
 
 
@@ -662,9 +662,9 @@ void DDMMonitorHook::meshinfo_to_vtk()
     for(int loc=elem_ids.size(); boundary_face_it != boundary_face_order.end(); ++boundary_face_it, ++loc)
     {
       int n = boundary_face_it->second;
-      region_info->SetValue(loc, boundary_elem_region[n]);
-      boundary_info->SetValue(loc, boundary_elem_boundary[n]);
-      partition_info->SetValue(loc, boundary_elem_partition[n]);
+      region_info->SetTuple1(loc, boundary_elem_region[n]);
+      boundary_info->SetTuple1(loc, boundary_elem_boundary[n]);
+      partition_info->SetTuple1(loc, boundary_elem_partition[n]);
     }
 
     grid->GetCellData()->AddArray(region_info);
@@ -1591,13 +1591,13 @@ void DDMMonitorHook::write_node_scaler_solution(const std::vector< std::vector<u
     //create vtk data array
     vtkFloatArray *vtk_sol_array = vtkFloatArray::New();
     vtk_sol_array->SetName(sol_name.c_str());
-    vtk_sol_array->SetNumberOfValues(solution.size());
+    vtk_sol_array->SetNumberOfTuples(solution.size());
 
     // save data into vtk data array
     for(unsigned int n=0; n<solution.size(); ++n)
     {
       // set scalar value to vtkFloatArray
-      vtk_sol_array->InsertValue(n, solution[n]);
+      vtk_sol_array->SetTuple1(n, solution[n]);
     }
 
     grid->GetPointData()->AddArray(vtk_sol_array);
@@ -1625,7 +1625,7 @@ void DDMMonitorHook::write_cell_scaler_solution(const std::vector<unsigned int> 
     //create vtk data array
     vtkFloatArray *vtk_sol_array = vtkFloatArray::New();
     vtk_sol_array->SetName(sol_name.c_str());
-    vtk_sol_array->SetNumberOfValues(order.size());
+    vtk_sol_array->SetNumberOfTuples(order.size());
 
     std::vector<float> sol_re_order(order.size());
     for(unsigned int n=0; n<order.size(); ++n)
@@ -1635,7 +1635,7 @@ void DDMMonitorHook::write_cell_scaler_solution(const std::vector<unsigned int> 
     for(unsigned int n=0; n<order.size(); ++n)
     {
       // set scalar value to vtkFloatArray
-      vtk_sol_array->InsertValue(n, sol_re_order[n]);
+      vtk_sol_array->SetTuple1(n, sol_re_order[n]);
     }
 
     grid->GetCellData()->AddArray(vtk_sol_array);
