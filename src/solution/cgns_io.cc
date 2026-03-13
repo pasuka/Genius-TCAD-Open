@@ -414,9 +414,9 @@ void CGNSIO::read (const std::string& filename)
         char           boco_name[33];
         BCType_t       boco_type ;
         PointSetType_t ptset_type ;
-        int            npnts ;
+        cgsize_t       npnts ;
         int            normalindex ;
-        int            normallistflag;
+        cgsize_t       normallistflag;
         DataType_t     normaldatatype;
         int            ndataset;
         int            nuserdata;
@@ -472,7 +472,7 @@ void CGNSIO::read (const std::string& filename)
             char       ArrayName[33];
             DataType_t DataType;
             int        DataDimension;
-            int        DimensionVector;
+            cgsize_t   DimensionVector;
 
             genius_assert(!cg_array_info(a, ArrayName , &DataType , &DataDimension , &DimensionVector ));
 
@@ -517,7 +517,7 @@ void CGNSIO::read (const std::string& filename)
               char array[33];
               DataType_t type;
               int dimension;
-              int vector;
+              cgsize_t vector;
               double data;
               genius_assert(!cg_array_info(a, array, &type, &dimension, &vector));
               genius_assert(!cg_array_read_as(a, type, &data));
@@ -550,7 +550,7 @@ void CGNSIO::read (const std::string& filename)
         genius_assert(!cg_sol_info(fn,B,z_id,sol_id,solutionname, &locationtype));
         for(int f_id=1; f_id<=F; f_id++)
         {
-          int        imin=1;
+          cgsize_t   imin=1;
           DataType_t datatype;
           char       fieldname[33];
           cg_field_info(fn, B, z_id, sol_id, f_id, &datatype, fieldname);
@@ -1112,7 +1112,7 @@ void CGNSIO::write (const std::string& filename)
   {
     const SimulationRegion * region = system.region(r);
 
-    int size[3];
+    cgsize_t size[3];
     // region node number
     size[0] = region_node_array[r].size();
 
@@ -1191,7 +1191,7 @@ void CGNSIO::write (const std::string& filename)
     {
       const std::vector<const Elem *> & region_elem = region_elem_array[r];
 
-      std::vector<int> elem_package;           // for element connectivity
+      std::vector<cgsize_t> elem_package;           // for element connectivity
       std::vector<int> elem_attribute;         // for element attribute
       std::vector<unsigned int> elem_id;
       elem_package.reserve(10*region_elem.size());// a bit overkill
@@ -1283,8 +1283,8 @@ void CGNSIO::write (const std::string& filename)
       genius_assert(!cg_section_write(fn, B ,Z, "GridElements", MIXED, 1, elem_id.size(), 0, &elem_package[0], &S));
 #ifdef ENABLE_AMR
       // write element amr attribute
-      int  elem_id_size = static_cast<int>(elem_id.size());
-      int  elem_attribute_size = static_cast<int>(elem_attribute.size());
+      cgsize_t  elem_id_size = static_cast<cgsize_t>(elem_id.size());
+      cgsize_t  elem_attribute_size = static_cast<cgsize_t>(elem_attribute.size());
       genius_assert(!cg_goto(fn, B, "Zone_t", Z , "end"));
       genius_assert(!cg_user_data_write ("Element_Attribute"));
       genius_assert(!cg_goto(fn, B, "Zone_t", Z, "UserDefinedData_t", 2, "end"));
@@ -1353,7 +1353,7 @@ void CGNSIO::write (const std::string& filename)
         assert(!cg_descriptor_write("bc_settings", bc->boundary_condition_in_string().c_str()));
 
         // extra information as element-side list
-        int n_side =  sides.size();
+        cgsize_t n_side =  sides.size();
         assert(!cg_goto(fn, B, "Zone_t", Z, "ZoneBC_t", 1, "BC_t", BC, "end"));
         assert(!cg_user_data_write ("element_side_information"));
         assert(!cg_goto(fn, B, "Zone_t", Z, "ZoneBC_t", 1, "BC_t", BC, "UserDefinedData_t", 1, "end"));
@@ -1367,7 +1367,7 @@ void CGNSIO::write (const std::string& filename)
           double potential_old = bc->ext_circuit()->potential_old()/V;
           double vapp = bc->ext_circuit()->Vapp()/V;
           double iapp = bc->ext_circuit()->Iapp()/A;
-          int    DimensionVector = 1;
+          cgsize_t DimensionVector = 1;
           assert(!cg_goto(fn, B, "Zone_t", Z, "ZoneBC_t", 1, "BC_t", BC, "end"));
           assert(!cg_user_data_write ("extra_data_for_electrode"));
           assert(!cg_goto(fn, B, "Zone_t", Z, "ZoneBC_t", 1, "BC_t", BC, "UserDefinedData_t", 2, "end"));
