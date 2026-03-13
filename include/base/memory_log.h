@@ -15,8 +15,8 @@ private:
   MMU() {}
   ~MMU() {}
   
-  static std::auto_ptr<MMU> _instance;
-  friend class std::auto_ptr<MMU>;
+  static std::unique_ptr<MMU> _instance;
+  friend struct std::default_delete<MMU>;
    
   static int _vmsize;
   static int _vmpeak;

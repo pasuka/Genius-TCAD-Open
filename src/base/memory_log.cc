@@ -7,7 +7,7 @@
 #include "memory_log.h"
 
 //static members
-std::auto_ptr<MMU> MMU::_instance;
+std::unique_ptr<MMU> MMU::_instance;
 int MMU::_vmsize =0;
 int MMU::_vmpeak =0;
 int MMU::_vmrss =0;
