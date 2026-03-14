@@ -970,14 +970,35 @@ int MeshGeneratorTri3::triangle_mesh()
 #endif
   int *psegmentlist =  in.segmentlist;
   int *psegmentmarkerlist = in.segmentmarkerlist;
+  int valid_segments = 0;
   std::map<SkeletonEdge, int, lt_edge>::iterator pt = edge_table.begin();
   for(size_t i=0;i<edge_table.size();i++)
   {
-    *psegmentlist++ = point_array3d[0][pt->first.p1[1]][pt->first.p1[0]].index;
-    *psegmentlist++ = point_array3d[0][pt->first.p2[1]][pt->first.p2[0]].index;
+    // Guard against out-of-bounds grid coordinates that can arise when all
+    // remaining points in a row/column are eliminated (skip loop overshoots).
+    unsigned int p1x = pt->first.p1[0], p1y = pt->first.p1[1];
+    unsigned int p2x = pt->first.p2[0], p2y = pt->first.p2[1];
+    if(p1x >= IX || p1y >= IY || p2x >= IX || p2y >= IY)
+    {
+      ++pt;
+      continue;
+    }
+    unsigned int idx1 = point_array3d[0][p1y][p1x].index;
+    unsigned int idx2 = point_array3d[0][p2y][p2x].index;
+    // Skip segments whose endpoints were eliminated (index == invalid_uint).
+    if(idx1 == invalid_uint || idx2 == invalid_uint)
+    {
+      ++pt;
+      continue;
+    }
+    *psegmentlist++ = static_cast<int>(idx1);
+    *psegmentlist++ = static_cast<int>(idx2);
     *psegmentmarkerlist++ = pt->second;
+    ++valid_segments;
     ++pt;
   }
+  // Update the segment count to reflect only the valid (non-skipped) entries.
+  in.numberofsegments = valid_segments;
 
   //set region information
   in.numberofholes = 0;
@@ -1391,13 +1412,17 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
     in.pointlist                = new double[in.numberofpoints*2];
     in.pointmarkerlist          = new int[in.numberofpoints];
 #endif
-    // push mesh nodes into triangle io
+    // push mesh nodes into triangle io using the node ID as the list index so
+    // that segment endpoint indices (also stored as absolute node IDs) refer to
+    // the correct coordinates.  Unused slots (from deleted/inactive nodes) are
+    // left at zero thanks to the calloc above.
     MeshBase::node_iterator node_it = _mesh.active_nodes_begin();
-    for(int i=0; node_it != _mesh.active_nodes_end() ; ++i, ++node_it)
+    for(; node_it != _mesh.active_nodes_end() ; ++node_it)
     {
-      in.pointlist[2*i+0] = (*(*node_it))(0);
-      in.pointlist[2*i+1] = (*(*node_it))(1);
-      in.pointmarkerlist[i] = _mesh.boundary_info->boundary_id(*node_it);
+      unsigned int id = (*node_it)->id();
+      in.pointlist[2*id+0] = (*(*node_it))(0);
+      in.pointlist[2*id+1] = (*(*node_it))(1);
+      in.pointmarkerlist[id] = _mesh.boundary_info->boundary_id(*node_it);
     }
   }
 
