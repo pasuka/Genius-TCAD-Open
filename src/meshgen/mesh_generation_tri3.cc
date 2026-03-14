@@ -96,6 +96,8 @@ void MeshGeneratorTri3::build_rectangle_mesh()
   IY = skeleton_line_y.point_array.size();
   IZ = 0;
 
+  MESSAGE << "  build_rectangle_mesh(): IX=" << IX << " IY=" << IY << "\n"; RECORD();
+
   point_num = IX*IY;
 
   // set up the 3d array for gird points
@@ -122,6 +124,9 @@ void MeshGeneratorTri3::build_rectangle_mesh()
   ymin  =  point_array3d[0][IY-1][0].y;
   zmin  =  0.0;
   zmax  =  0.0;
+
+  MESSAGE << "  build_rectangle_mesh(): domain [" << xmin << "," << xmax << "] x ["
+          << ymin << "," << ymax << "]\n"; RECORD();
 }
 
 
@@ -822,7 +827,7 @@ int MeshGeneratorTri3::set_face(const Parser::Card &c)
   {
     if(c.is_enum_value("location","top"))
       iymin=iymax=0;
-    else if(c.is_enum_value("location","bottom"))
+    else if(c.is_enum_value("location","bottom") || c.is_enum_value("location","bot"))
       iymin=iymax=IY-1;
     else if(c.is_enum_value("location","left"))
       ixmin=ixmax=0;
@@ -833,6 +838,14 @@ int MeshGeneratorTri3::set_face(const Parser::Card &c)
       MESSAGE<<"ERROR at " <<c.get_fileline()<< " FACE: for Tet3 mesh, face can not locate on front/back!\n";
       RECORD();
       return 1;
+    }
+    else
+    {
+      MESSAGE<<"WARNING at " <<c.get_fileline()
+             << " FACE: unrecognized location value \""
+             << c.get_string("location","") << "\". "
+             << "Valid values: top, bottom (or bot), left, right.\n";
+      RECORD();
     }
   }
 
@@ -894,6 +907,27 @@ int MeshGeneratorTri3::set_face(const Parser::Card &c)
  */
 int MeshGeneratorTri3::triangle_mesh()
 {
+  MESSAGE << "  triangle_mesh(): point_num=" << point_num
+          << " regions=" << region_array1d.size()
+          << " edges=" << edge_table.size()
+          << " tri_cmd=\"" << tri_cmd << "\"\n"; RECORD();
+
+  if(point_num == 0)
+  {
+    MESSAGE << "ERROR: triangle_mesh(): no active mesh points after node elimination. "
+               "Check ELIMINATE cards or that X.MESH/Y.MESH grids are non-empty.\n";
+    RECORD();
+    return 1;
+  }
+
+  if(region_array1d.empty())
+  {
+    MESSAGE << "ERROR: triangle_mesh(): no regions defined. "
+               "Check REGION cards.\n";
+    RECORD();
+    return 1;
+  }
+
   //set point
   in.numberofpoints = point_num;
   in.numberofpointattributes = 0;
@@ -970,11 +1004,20 @@ int MeshGeneratorTri3::triangle_mesh()
   }
 
   // call Triangle here
+  MESSAGE << "  triangle_mesh(): calling triangulate() with "
+          << in.numberofpoints << " points, "
+          << in.numberofsegments << " segments, "
+          << in.numberofregions << " regions\n"; RECORD();
 #ifdef __triangle_h__
   triangulate(const_cast<char *>(tri_cmd.c_str()), &in, &out, (struct triangulateio *) NULL);
 #else
   ctri_triangulate(const_cast<char *>(tri_cmd.c_str()), &in, &out);
 #endif
+  MESSAGE << "  triangle_mesh(): triangulate() returned "
+          << out.numberofpoints << " points, "
+          << out.numberoftriangles << " triangles, "
+          << out.numberofsegments << " segments\n"; RECORD();
+
   // set boundary mark to output edge
   out_edge_table.clear();
   // Guard against NULL segment arrays: Triangle may not populate these when
@@ -1058,6 +1101,7 @@ int MeshGeneratorTri3::do_mesh()
       // out.triangleattributelist even if the user omitted it.
       if(tri_cmd.find('A') == std::string::npos)
         tri_cmd += 'A';
+      MESSAGE<<"  do_mesh(): tri_cmd=\"" << tri_cmd << "\"\n"; RECORD();
     }
 
     if(c.key() == "X.MESH")   // It's a X.MESH card
@@ -1075,6 +1119,14 @@ int MeshGeneratorTri3::do_mesh()
   }
 
   //after the initializtion of x and y mesh lines, we can build rectangle mesh now.
+  // Guard against empty mesh lines before building the grid.
+  if(skeleton_line_x.point_array.empty() || skeleton_line_y.point_array.empty())
+  {
+    MESSAGE<<"ERROR: do_mesh(): No X.MESH or Y.MESH cards found. "
+             "At least one X.MESH and one Y.MESH card are required.\n";
+    RECORD();
+    return 1;
+  }
   build_rectangle_mesh();
 
   //use ELIMINATE and SPREAD card to do necessary modification to the rectangle mesh.
@@ -1100,11 +1152,16 @@ int MeshGeneratorTri3::do_mesh()
       if( set_region(c) ) return 1;
   }
 
+  MESSAGE<<"  do_mesh(): " << region_array1d.size() << " region(s) defined\n"; RECORD();
+
   // pick up the boundary of xy plane
   // Thus, the boundary will be reserved during triangle mesh.
   make_region_segment();
 
   make_node_index();
+
+  MESSAGE<<"  do_mesh(): after make_node_index(): point_num=" << point_num
+         << " edge_segments=" << edge_table.size() << "\n"; RECORD();
 
   // set labeled faces(most of them are electrode) defined by user here.
   for( _decks.begin(); !_decks.end(); _decks.next() )
@@ -1114,6 +1171,8 @@ int MeshGeneratorTri3::do_mesh()
     if(c.key() == "FACE")      // set face here.
       if( set_face(c) ) return 1;
   }
+
+  MESSAGE<<"  do_mesh(): " << face_array1d.size() << " face(s) defined\n"; RECORD();
 
   triangulateio_init();
 
@@ -1423,12 +1482,20 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
   }
 
   // rebuild the triangulation mesh
+  MESSAGE << "  do_refine(): calling triangulate() with "
+          << in.numberofpoints << " points, "
+          << in.numberofsegments << " segments, "
+          << in.numberofregions << " regions, "
+          << "tri_cmd=\"" << tri_cmd << "\"\n"; RECORD();
 #ifdef __triangle_h__
   triangulate(const_cast<char *>(tri_cmd.c_str()), &in, &out, (struct triangulateio *) NULL);
 #else
   ctri_triangulate(const_cast<char *>(tri_cmd.c_str()), &in, &out);
 #endif
-
+  MESSAGE << "  do_refine(): triangulate() returned "
+          << out.numberofpoints << " points, "
+          << out.numberoftriangles << " triangles, "
+          << out.numberofsegments << " segments\n"; RECORD();
   // set boundary mark to output edge
   out_edge_table.clear();
   // Guard against NULL segment arrays in the same way as triangle_mesh().
