@@ -975,7 +975,9 @@ int MeshGeneratorTri3::triangle_mesh()
   for(size_t i=0;i<edge_table.size();i++)
   {
     // Guard against out-of-bounds grid coordinates that can arise when all
-    // remaining points in a row/column are eliminated (skip loop overshoots).
+    // remaining points in a row/column are eliminated: the skip loops in
+    // make_region_segment() and make_face() can advance past the last valid
+    // index, setting p2[0] == IX or p2[1] == IY.
     unsigned int p1x = pt->first.p1[0], p1y = pt->first.p1[1];
     unsigned int p2x = pt->first.p2[0], p2y = pt->first.p2[1];
     if(p1x >= IX || p1y >= IY || p2x >= IX || p2y >= IY)
@@ -1414,8 +1416,10 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
 #endif
     // push mesh nodes into triangle io using the node ID as the list index so
     // that segment endpoint indices (also stored as absolute node IDs) refer to
-    // the correct coordinates.  Unused slots (from deleted/inactive nodes) are
-    // left at zero thanks to the calloc above.
+    // the correct coordinates.  Any slots that correspond to inactive/deleted
+    // nodes remain at zero because calloc() zero-initialises the allocation
+    // (when __triangle_h__ is defined); unused zero-coordinate points are
+    // harmless as they won't be referenced by any segment.
     MeshBase::node_iterator node_it = _mesh.active_nodes_begin();
     for(; node_it != _mesh.active_nodes_end() ; ++node_it)
     {
