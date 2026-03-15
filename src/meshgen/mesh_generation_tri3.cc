@@ -23,7 +23,8 @@
 
 
 // C++ includes
-#include <cmath> // for std::sqrt
+#include <algorithm> // for std::max
+#include <cmath> // for std::sqrt, std::isnan, std::isinf
 #include <cstdlib>
 #include <cstring> // for memset
 
@@ -1026,6 +1027,80 @@ int MeshGeneratorTri3::triangle_mesh()
     *pregionlist++ = 0;
   }
 
+  // Validate all input data before calling Triangle so that bad values are
+  // caught and reported rather than causing a cryptic SIGSEGV inside the
+  // library.  Three checks are performed:
+  //   1. Every point coordinate must be a finite number (no NaN or Inf).
+  //   2. Every segment endpoint index must be in [0, numberofpoints-1].
+  //   3. The total number of valid segments must be >= 3 for a closed PSLG.
+  {
+    bool input_ok = true;
+
+    for(int i = 0; i < in.numberofpoints && input_ok; i++)
+    {
+      double x = in.pointlist[2*i+0];
+      double y = in.pointlist[2*i+1];
+      if(std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isinf(y))
+      {
+        MESSAGE << "ERROR: triangle_mesh(): point " << i
+                << " has non-finite coordinates (" << x << ", " << y << ").\n";
+        RECORD();
+        input_ok = false;
+      }
+    }
+
+    for(int i = 0; i < in.numberofsegments && input_ok; i++)
+    {
+      int p1 = in.segmentlist[2*i+0];
+      int p2 = in.segmentlist[2*i+1];
+      if(p1 < 0 || p1 >= in.numberofpoints ||
+         p2 < 0 || p2 >= in.numberofpoints)
+      {
+        MESSAGE << "ERROR: triangle_mesh(): segment " << i
+                << " endpoint (" << p1 << ", " << p2
+                << ") out of range [0, " << in.numberofpoints-1 << "].\n";
+        RECORD();
+        input_ok = false;
+      }
+    }
+
+    if(in.numberofsegments < 3)
+    {
+      MESSAGE << "WARNING: triangle_mesh(): only " << in.numberofsegments
+              << " segment(s); a valid closed PSLG needs at least 3.\n";
+      RECORD();
+    }
+
+    if(!input_ok)
+    {
+      // Print the first and last few points and segments to aid debugging.
+      MESSAGE << "  Diagnostic dump (first/last 3 points):\n";
+      int n = in.numberofpoints;
+      for(int i = 0; i < (n < 3 ? n : 3); i++)
+        MESSAGE << "    pt[" << i << "] = ("
+                << in.pointlist[2*i+0] << ", "
+                << in.pointlist[2*i+1] << ")\n";
+      for(int i = std::max(3, n-3); i < n; i++)
+        MESSAGE << "    pt[" << i << "] = ("
+                << in.pointlist[2*i+0] << ", "
+                << in.pointlist[2*i+1] << ")\n";
+      MESSAGE << "  Diagnostic dump (first/last 3 segments):\n";
+      int ns = in.numberofsegments;
+      for(int i = 0; i < (ns < 3 ? ns : 3); i++)
+        MESSAGE << "    seg[" << i << "] = ("
+                << in.segmentlist[2*i+0] << ", "
+                << in.segmentlist[2*i+1]
+                << ") mark=" << in.segmentmarkerlist[i] << "\n";
+      for(int i = std::max(3, ns-3); i < ns; i++)
+        MESSAGE << "    seg[" << i << "] = ("
+                << in.segmentlist[2*i+0] << ", "
+                << in.segmentlist[2*i+1]
+                << ") mark=" << in.segmentmarkerlist[i] << "\n";
+      RECORD();
+      return 1;
+    }
+  }
+
   // call Triangle here
   MESSAGE << "  triangle_mesh(): calling triangulate() with "
           << in.numberofpoints << " points, "
@@ -1424,6 +1499,14 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
     for(; node_it != _mesh.active_nodes_end() ; ++node_it)
     {
       unsigned int id = (*node_it)->id();
+      if(id >= static_cast<unsigned int>(in.numberofpoints))
+      {
+        MESSAGE << "ERROR: do_refine(): node id=" << id
+                << " exceeds allocated pointlist size " << in.numberofpoints
+                << ". max_node_id()=" << _mesh.max_node_id() << ".\n";
+        RECORD();
+        return 1;
+      }
       in.pointlist[2*id+0] = (*(*node_it))(0);
       in.pointlist[2*id+1] = (*(*node_it))(1);
       in.pointmarkerlist[id] = _mesh.boundary_info->boundary_id(*node_it);
@@ -1507,6 +1590,67 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
       bd_label_map[*it] =  _mesh.boundary_info->get_label_by_id(*it);
       if( _mesh.boundary_info->boundary_id_has_user_defined_label(*it) )
         bd_user_defined.insert(*it);
+    }
+  }
+
+  // Validate input data before calling Triangle (same checks as in triangle_mesh()).
+  {
+    bool input_ok = true;
+
+    for(int i = 0; i < in.numberofpoints && input_ok; i++)
+    {
+      double x = in.pointlist[2*i+0];
+      double y = in.pointlist[2*i+1];
+      if(std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isinf(y))
+      {
+        MESSAGE << "ERROR: do_refine(): point " << i
+                << " has non-finite coordinates (" << x << ", " << y << ").\n";
+        RECORD();
+        input_ok = false;
+      }
+    }
+
+    for(int i = 0; i < in.numberofsegments && input_ok; i++)
+    {
+      int p1 = in.segmentlist[2*i+0];
+      int p2 = in.segmentlist[2*i+1];
+      if(p1 < 0 || p1 >= in.numberofpoints ||
+         p2 < 0 || p2 >= in.numberofpoints)
+      {
+        MESSAGE << "ERROR: do_refine(): segment " << i
+                << " endpoint (" << p1 << ", " << p2
+                << ") out of range [0, " << in.numberofpoints-1 << "].\n";
+        RECORD();
+        input_ok = false;
+      }
+    }
+
+    if(!input_ok)
+    {
+      MESSAGE << "  Diagnostic dump (first/last 3 points):\n";
+      int n = in.numberofpoints;
+      for(int i = 0; i < (n < 3 ? n : 3); i++)
+        MESSAGE << "    pt[" << i << "] = ("
+                << in.pointlist[2*i+0] << ", "
+                << in.pointlist[2*i+1] << ")\n";
+      for(int i = std::max(3, n-3); i < n; i++)
+        MESSAGE << "    pt[" << i << "] = ("
+                << in.pointlist[2*i+0] << ", "
+                << in.pointlist[2*i+1] << ")\n";
+      MESSAGE << "  Diagnostic dump (first/last 3 segments):\n";
+      int ns = in.numberofsegments;
+      for(int i = 0; i < (ns < 3 ? ns : 3); i++)
+        MESSAGE << "    seg[" << i << "] = ("
+                << in.segmentlist[2*i+0] << ", "
+                << in.segmentlist[2*i+1]
+                << ") mark=" << in.segmentmarkerlist[i] << "\n";
+      for(int i = std::max(3, ns-3); i < ns; i++)
+        MESSAGE << "    seg[" << i << "] = ("
+                << in.segmentlist[2*i+0] << ", "
+                << in.segmentlist[2*i+1]
+                << ") mark=" << in.segmentmarkerlist[i] << "\n";
+      RECORD();
+      return 1;
     }
   }
 
