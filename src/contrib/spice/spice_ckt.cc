@@ -48,11 +48,13 @@
 SPICE_CKT::SPICE_CKT(const std::string & ckt_file)
     : _ckt_file(ckt_file)
 {
-  std::string filename =  Genius::genius_dir() + "/lib/spice.so";
-
 #ifdef WINDOWS
-  dll_file = LoadLibrary(filename.c_str());
+  std::string filename =  Genius::genius_dir() + "\\lib\\spice.dll";
+  // Use LOAD_WITH_ALTERED_SEARCH_PATH so that Windows searches the directory
+  // containing spice.dll for its transitive dependencies.
+  dll_file = LoadLibraryEx(filename.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 #else
+  std::string filename =  Genius::genius_dir() + "/lib/spice.so";
   // NOTE: Because genius exports all its symbol with --export-dynamic flag
   // It seems libspice has symbol conflict when Intel MKL is used (fblaslapack is ok).
   // Here we use RTLD_DEEPBIND to prevent symbol confilict with genius.
