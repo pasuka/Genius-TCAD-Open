@@ -11028,6 +11028,7 @@ struct behavior *b;
   if (!b->quiet) {
     printf(
       "Constructing Delaunay triangulation by divide-and-conquer method.\n");
+    fflush(stdout);
   }
   hulledges = divconqdelaunay(m, b);
 #else /* not REDUCED */
@@ -11040,6 +11041,7 @@ struct behavior *b;
     } else {
       printf("by divide-and-conquer method.\n");
     }
+    fflush(stdout);
   }
   if (b->incremental) {
     hulledges = incrementaldelaunay(m, b);
@@ -11828,45 +11830,47 @@ int newmark;
   enum finddirectionresult collinear;
   subseg sptr;                      /* Temporary variable used by tspivot(). */
 
-  collinear = finddirection(m, b, searchtri, endpoint2);
-  dest(*searchtri, rightvertex);
-  apex(*searchtri, leftvertex);
-  if (((leftvertex[0] == endpoint2[0]) && (leftvertex[1] == endpoint2[1])) ||
-      ((rightvertex[0] == endpoint2[0]) && (rightvertex[1] == endpoint2[1]))) {
-    /* The segment is already an edge in the mesh. */
-    if ((leftvertex[0] == endpoint2[0]) && (leftvertex[1] == endpoint2[1])) {
-      lprevself(*searchtri);
-    }
-    /* Insert a subsegment, if there isn't already one there. */
-    insertsubseg(m, b, searchtri, newmark);
-    return 1;
-  } else if (collinear == LEFTCOLLINEAR) {
-    /* We've collided with a vertex between the segment's endpoints. */
-    /* Make the collinear vertex be the triangle's origin. */
-    lprevself(*searchtri);
-    insertsubseg(m, b, searchtri, newmark);
-    /* Insert the remainder of the segment. */
-    return scoutsegment(m, b, searchtri, endpoint2, newmark);
-  } else if (collinear == RIGHTCOLLINEAR) {
-    /* We've collided with a vertex between the segment's endpoints. */
-    insertsubseg(m, b, searchtri, newmark);
-    /* Make the collinear vertex be the triangle's origin. */
-    lnextself(*searchtri);
-    /* Insert the remainder of the segment. */
-    return scoutsegment(m, b, searchtri, endpoint2, newmark);
-  } else {
-    lnext(*searchtri, crosstri);
-    tspivot(crosstri, crosssubseg);
-    /* Check for a crossing segment. */
-    if (crosssubseg.ss == m->dummysub) {
-      return 0;
-    } else {
-      /* Insert a vertex at the intersection. */
-      segmentintersection(m, b, &crosstri, &crosssubseg, endpoint2);
-      otricopy(crosstri, *searchtri);
+  /* Converted from tail recursion to an iterative loop to prevent stack
+   * overflow when a segment passes through many collinear or intersecting
+   * intermediate vertices (O(N) recursion depth in the original version). */
+  while (1) {
+    collinear = finddirection(m, b, searchtri, endpoint2);
+    dest(*searchtri, rightvertex);
+    apex(*searchtri, leftvertex);
+    if (((leftvertex[0] == endpoint2[0]) && (leftvertex[1] == endpoint2[1])) ||
+        ((rightvertex[0] == endpoint2[0]) && (rightvertex[1] == endpoint2[1]))) {
+      /* The segment is already an edge in the mesh. */
+      if ((leftvertex[0] == endpoint2[0]) && (leftvertex[1] == endpoint2[1])) {
+        lprevself(*searchtri);
+      }
+      /* Insert a subsegment, if there isn't already one there. */
       insertsubseg(m, b, searchtri, newmark);
-      /* Insert the remainder of the segment. */
-      return scoutsegment(m, b, searchtri, endpoint2, newmark);
+      return 1;
+    } else if (collinear == LEFTCOLLINEAR) {
+      /* We've collided with a vertex between the segment's endpoints. */
+      /* Make the collinear vertex be the triangle's origin. */
+      lprevself(*searchtri);
+      insertsubseg(m, b, searchtri, newmark);
+      /* Insert the remainder of the segment: loop instead of recurse. */
+    } else if (collinear == RIGHTCOLLINEAR) {
+      /* We've collided with a vertex between the segment's endpoints. */
+      insertsubseg(m, b, searchtri, newmark);
+      /* Make the collinear vertex be the triangle's origin. */
+      lnextself(*searchtri);
+      /* Insert the remainder of the segment: loop instead of recurse. */
+    } else {
+      lnext(*searchtri, crosstri);
+      tspivot(crosstri, crosssubseg);
+      /* Check for a crossing segment. */
+      if (crosssubseg.ss == m->dummysub) {
+        return 0;
+      } else {
+        /* Insert a vertex at the intersection. */
+        segmentintersection(m, b, &crosstri, &crosssubseg, endpoint2);
+        otricopy(crosstri, *searchtri);
+        insertsubseg(m, b, searchtri, newmark);
+        /* Insert the remainder of the segment: loop instead of recurse. */
+      }
     }
   }
 }
@@ -12042,51 +12046,59 @@ int leftside;
   triangle ptr;                         /* Temporary variable used by sym(). */
   subseg sptr;                      /* Temporary variable used by tspivot(). */
 
-  lnext(*fixuptri, neartri);
-  sym(neartri, fartri);
-  /* Check if the edge opposite the origin of fixuptri can be flipped. */
-  if (fartri.tri == m->dummytri) {
-    return;
-  }
-  tspivot(neartri, faredge);
-  if (faredge.ss != m->dummysub) {
-    return;
-  }
-  /* Find all the relevant vertices. */
-  apex(neartri, nearvertex);
-  org(neartri, leftvertex);
-  dest(neartri, rightvertex);
-  apex(fartri, farvertex);
-  /* Check whether the previous polygon vertex is a reflex vertex. */
-  if (leftside) {
-    if (counterclockwise(m, b, nearvertex, leftvertex, farvertex) <= 0.0) {
-      /* leftvertex is a reflex vertex too.  Nothing can */
-      /*   be done until a convex section is found.      */
+  /* Converted the first recursive call to an iterative loop to prevent deep
+   * call-stack growth.  The original code called itself twice after each
+   * flip; the first call (on fixuptri) becomes the loop iteration, while
+   * the second call (on fartri) remains recursive.  In typical meshes the
+   * fartri branch terminates in O(1) levels, keeping overall stack depth
+   * manageable. */
+  while (1) {
+    lnext(*fixuptri, neartri);
+    sym(neartri, fartri);
+    /* Check if the edge opposite the origin of fixuptri can be flipped. */
+    if (fartri.tri == m->dummytri) {
       return;
     }
-  } else {
-    if (counterclockwise(m, b, farvertex, rightvertex, nearvertex) <= 0.0) {
-      /* rightvertex is a reflex vertex too.  Nothing can */
-      /*   be done until a convex section is found.       */
+    tspivot(neartri, faredge);
+    if (faredge.ss != m->dummysub) {
       return;
     }
+    /* Find all the relevant vertices. */
+    apex(neartri, nearvertex);
+    org(neartri, leftvertex);
+    dest(neartri, rightvertex);
+    apex(fartri, farvertex);
+    /* Check whether the previous polygon vertex is a reflex vertex. */
+    if (leftside) {
+      if (counterclockwise(m, b, nearvertex, leftvertex, farvertex) <= 0.0) {
+        /* leftvertex is a reflex vertex too.  Nothing can */
+        /*   be done until a convex section is found.      */
+        return;
+      }
+    } else {
+      if (counterclockwise(m, b, farvertex, rightvertex, nearvertex) <= 0.0) {
+        /* rightvertex is a reflex vertex too.  Nothing can */
+        /*   be done until a convex section is found.       */
+        return;
+      }
+    }
+    if (counterclockwise(m, b, rightvertex, leftvertex, farvertex) > 0.0) {
+      /* fartri is not an inverted triangle, and farvertex is not a reflex */
+      /*   vertex.  As there are no reflex vertices, fixuptri isn't an     */
+      /*   inverted triangle, either.  Hence, test the edge between the    */
+      /*   triangles to ensure it is locally Delaunay.                     */
+      if (incircle(m, b, leftvertex, farvertex, rightvertex, nearvertex) <=
+          0.0) {
+        return;
+      }
+      /* Not locally Delaunay; go on to an edge flip. */
+    }        /* else fartri is inverted; remove it from the stack by flipping. */
+    flip(m, b, &neartri);
+    lprevself(*fixuptri);    /* Restore the origin of fixuptri after the flip. */
+    /* Process the fartri triangle with recursion (typically shallow). */
+    delaunayfixup(m, b, &fartri, leftside);
+    /* Loop to process fixuptri (replaces the first recursive call). */
   }
-  if (counterclockwise(m, b, rightvertex, leftvertex, farvertex) > 0.0) {
-    /* fartri is not an inverted triangle, and farvertex is not a reflex */
-    /*   vertex.  As there are no reflex vertices, fixuptri isn't an     */
-    /*   inverted triangle, either.  Hence, test the edge between the    */
-    /*   triangles to ensure it is locally Delaunay.                     */
-    if (incircle(m, b, leftvertex, farvertex, rightvertex, nearvertex) <=
-        0.0) {
-      return;
-    }
-    /* Not locally Delaunay; go on to an edge flip. */
-  }        /* else fartri is inverted; remove it from the stack by flipping. */
-  flip(m, b, &neartri);
-  lprevself(*fixuptri);    /* Restore the origin of fixuptri after the flip. */
-  /* Recursively process the two triangles that result from the flip. */
-  delaunayfixup(m, b, fixuptri, leftside);
-  delaunayfixup(m, b, &fartri, leftside);
 }
 
 /*****************************************************************************/
@@ -12166,76 +12178,86 @@ int newmark;
   triangle ptr;             /* Temporary variable used by sym() and oprev(). */
   subseg sptr;                      /* Temporary variable used by tspivot(). */
 
-  org(*starttri, endpoint1);
-  lnext(*starttri, fixuptri);
-  flip(m, b, &fixuptri);
-  /* `collision' indicates whether we have found a vertex directly */
-  /*   between endpoint1 and endpoint2.                            */
-  collision = 0;
-  done = 0;
-  do {
-    org(fixuptri, farvertex);
-    /* `farvertex' is the extreme point of the polygon we are "digging" */
-    /*   to get from endpoint1 to endpoint2.                           */
-    if ((farvertex[0] == endpoint2[0]) && (farvertex[1] == endpoint2[1])) {
-      oprev(fixuptri, fixuptri2);
-      /* Enforce the Delaunay condition around endpoint2. */
-      delaunayfixup(m, b, &fixuptri, 0);
-      delaunayfixup(m, b, &fixuptri2, 1);
-      done = 1;
-    } else {
-      /* Check whether farvertex is to the left or right of the segment */
-      /*   being inserted, to decide which edge of fixuptri to dig      */
-      /*   through next.                                                */
-      area = counterclockwise(m, b, endpoint1, endpoint2, farvertex);
-      if (area == 0.0) {
-        /* We've collided with a vertex between endpoint1 and endpoint2. */
-        collision = 1;
+  /* Converted from tail recursion to an iterative loop to prevent stack
+   * overflow when a segment collides with many intermediate vertices
+   * (O(N) recursion depth in the original version). */
+  while (1) {
+    org(*starttri, endpoint1);
+    lnext(*starttri, fixuptri);
+    flip(m, b, &fixuptri);
+    /* `collision' indicates whether we have found a vertex directly */
+    /*   between endpoint1 and endpoint2.                            */
+    collision = 0;
+    done = 0;
+    do {
+      org(fixuptri, farvertex);
+      /* `farvertex' is the extreme point of the polygon we are "digging" */
+      /*   to get from endpoint1 to endpoint2.                           */
+      if ((farvertex[0] == endpoint2[0]) && (farvertex[1] == endpoint2[1])) {
         oprev(fixuptri, fixuptri2);
-        /* Enforce the Delaunay condition around farvertex. */
+        /* Enforce the Delaunay condition around endpoint2. */
         delaunayfixup(m, b, &fixuptri, 0);
         delaunayfixup(m, b, &fixuptri2, 1);
         done = 1;
       } else {
-        if (area > 0.0) {        /* farvertex is to the left of the segment. */
-          oprev(fixuptri, fixuptri2);
-          /* Enforce the Delaunay condition around farvertex, on the */
-          /*   left side of the segment only.                        */
-          delaunayfixup(m, b, &fixuptri2, 1);
-          /* Flip the edge that crosses the segment.  After the edge is */
-          /*   flipped, one of its endpoints is the fan vertex, and the */
-          /*   destination of fixuptri is the fan vertex.               */
-          lprevself(fixuptri);
-        } else {                /* farvertex is to the right of the segment. */
-          delaunayfixup(m, b, &fixuptri, 0);
-          /* Flip the edge that crosses the segment.  After the edge is */
-          /*   flipped, one of its endpoints is the fan vertex, and the */
-          /*   destination of fixuptri is the fan vertex.               */
-          oprevself(fixuptri);
-        }
-        /* Check for two intersecting segments. */
-        tspivot(fixuptri, crosssubseg);
-        if (crosssubseg.ss == m->dummysub) {
-          flip(m, b, &fixuptri);    /* May create inverted triangle at left. */
-        } else {
-          /* We've collided with a segment between endpoint1 and endpoint2. */
+        /* Check whether farvertex is to the left or right of the segment */
+        /*   being inserted, to decide which edge of fixuptri to dig      */
+        /*   through next.                                                */
+        area = counterclockwise(m, b, endpoint1, endpoint2, farvertex);
+        if (area == 0.0) {
+          /* We've collided with a vertex between endpoint1 and endpoint2. */
           collision = 1;
-          /* Insert a vertex at the intersection. */
-          segmentintersection(m, b, &fixuptri, &crosssubseg, endpoint2);
+          oprev(fixuptri, fixuptri2);
+          /* Enforce the Delaunay condition around farvertex. */
+          delaunayfixup(m, b, &fixuptri, 0);
+          delaunayfixup(m, b, &fixuptri2, 1);
           done = 1;
+        } else {
+          if (area > 0.0) {        /* farvertex is to the left of the segment. */
+            oprev(fixuptri, fixuptri2);
+            /* Enforce the Delaunay condition around farvertex, on the */
+            /*   left side of the segment only.                        */
+            delaunayfixup(m, b, &fixuptri2, 1);
+            /* Flip the edge that crosses the segment.  After the edge is */
+            /*   flipped, one of its endpoints is the fan vertex, and the */
+            /*   destination of fixuptri is the fan vertex.               */
+            lprevself(fixuptri);
+          } else {                /* farvertex is to the right of the segment. */
+            delaunayfixup(m, b, &fixuptri, 0);
+            /* Flip the edge that crosses the segment.  After the edge is */
+            /*   flipped, one of its endpoints is the fan vertex, and the */
+            /*   destination of fixuptri is the fan vertex.               */
+            oprevself(fixuptri);
+          }
+          /* Check for two intersecting segments. */
+          tspivot(fixuptri, crosssubseg);
+          if (crosssubseg.ss == m->dummysub) {
+            flip(m, b, &fixuptri);    /* May create inverted triangle at left. */
+          } else {
+            /* We've collided with a segment between endpoint1 and endpoint2. */
+            collision = 1;
+            /* Insert a vertex at the intersection. */
+            segmentintersection(m, b, &fixuptri, &crosssubseg, endpoint2);
+            done = 1;
+          }
         }
       }
+    } while (!done);
+    /* Insert a subsegment to make the segment permanent. */
+    insertsubseg(m, b, &fixuptri, newmark);
+    /* If there was a collision with an interceding vertex, install another */
+    /*   segment connecting that vertex with endpoint2.                     */
+    if (collision) {
+      /* Insert the remainder of the segment. */
+      if (!scoutsegment(m, b, &fixuptri, endpoint2, newmark)) {
+        /* Loop instead of: constrainededge(m, b, &fixuptri, endpoint2, newmark).
+         * Update *starttri so the next iteration re-extracts endpoint1 via
+         * org(*starttri, endpoint1) at the top of the loop. */
+        otricopy(fixuptri, *starttri);
+        continue;
+      }
     }
-  } while (!done);
-  /* Insert a subsegment to make the segment permanent. */
-  insertsubseg(m, b, &fixuptri, newmark);
-  /* If there was a collision with an interceding vertex, install another */
-  /*   segment connecting that vertex with endpoint2.                     */
-  if (collision) {
-    /* Insert the remainder of the segment. */
-    if (!scoutsegment(m, b, &fixuptri, endpoint2, newmark)) {
-      constrainededge(m, b, &fixuptri, endpoint2, newmark);
-    }
+    break;
   }
 }
 
