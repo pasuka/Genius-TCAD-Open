@@ -972,6 +972,8 @@ int MeshGeneratorTri3::triangle_mesh()
   int *psegmentlist =  in.segmentlist;
   int *psegmentmarkerlist = in.segmentmarkerlist;
   int valid_segments = 0;
+  int skipped_oob = 0;       // skipped: grid coordinates out of bounds
+  int skipped_elim = 0;      // skipped: one or both endpoints were eliminated
   std::map<SkeletonEdge, int, lt_edge>::iterator pt = edge_table.begin();
   for(size_t i=0;i<edge_table.size();i++)
   {
@@ -983,6 +985,7 @@ int MeshGeneratorTri3::triangle_mesh()
     unsigned int p2x = pt->first.p2[0], p2y = pt->first.p2[1];
     if(p1x >= IX || p1y >= IY || p2x >= IX || p2y >= IY)
     {
+      ++skipped_oob;
       ++pt;
       continue;
     }
@@ -991,6 +994,7 @@ int MeshGeneratorTri3::triangle_mesh()
     // Skip segments whose endpoints were eliminated (index == invalid_uint).
     if(idx1 == invalid_uint || idx2 == invalid_uint)
     {
+      ++skipped_elim;
       ++pt;
       continue;
     }
@@ -1002,6 +1006,15 @@ int MeshGeneratorTri3::triangle_mesh()
   }
   // Update the segment count to reflect only the valid (non-skipped) entries.
   in.numberofsegments = valid_segments;
+  if(skipped_oob > 0 || skipped_elim > 0)
+  {
+    MESSAGE << "  triangle_mesh(): segment filtering: "
+            << valid_segments << " kept, "
+            << skipped_oob    << " skipped (out-of-bounds grid coords), "
+            << skipped_elim   << " skipped (eliminated endpoints)"
+            << " out of " << edge_table.size() << " total.\n";
+    RECORD();
+  }
 
   //set region information
   in.numberofholes = 0;
@@ -1066,9 +1079,13 @@ int MeshGeneratorTri3::triangle_mesh()
 
     if(in.numberofsegments < 3)
     {
-      MESSAGE << "WARNING: triangle_mesh(): only " << in.numberofsegments
-              << " segment(s); a valid closed PSLG needs at least 3.\n";
+      MESSAGE << "ERROR: triangle_mesh(): only " << in.numberofsegments
+              << " segment(s) remain after filtering; a valid closed PSLG needs at least 3.\n"
+              << "  (started with " << edge_table.size() << " edges; "
+              << skipped_oob  << " skipped for out-of-bounds coords, "
+              << skipped_elim << " skipped for eliminated endpoints)\n";
       RECORD();
+      input_ok = false;  // triggers the diagnostic dump + return 1 in the if(!input_ok) block below
     }
 
     if(!input_ok)
@@ -1565,7 +1582,23 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
   std::map<short int, std::string> bd_label_map;
   std::set<short int>  bd_user_defined;
   {
-    in.numberofsegments =  _mesh.boundary_info->n_boundary_conds();
+    int n_boundary_conds = _mesh.boundary_info->n_boundary_conds();
+    std::vector<unsigned int>       el;
+    std::vector<unsigned short int> sl;
+    std::vector<short int>          il;
+    _mesh.boundary_info->build_side_list (el, sl, il);
+
+    if(static_cast<int>(el.size()) != n_boundary_conds)
+    {
+      MESSAGE << "WARNING: do_refine(): boundary_info->n_boundary_conds()=" << n_boundary_conds
+              << " but build_side_list() returned " << el.size() << " sides; "
+              << "using " << el.size() << " segments.\n"
+              << "  This can occur when boundary data is inconsistent after mesh flattening.\n"
+              << "  The actual sides from build_side_list() will be used.\n";
+      RECORD();
+    }
+    in.numberofsegments = static_cast<int>(el.size());
+
 #ifdef __triangle_h__
     in.segmentlist =  (int *) calloc(in.numberofsegments*2, sizeof(int));
     in.segmentmarkerlist = (int *) calloc(in.numberofsegments, sizeof(int));
@@ -1573,10 +1606,6 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
     in.segmentlist =  new int[in.numberofsegments*2];
     in.segmentmarkerlist = new int[in.numberofsegments];
 #endif
-    std::vector<unsigned int>       el;
-    std::vector<unsigned short int> sl;
-    std::vector<short int>          il;
-    _mesh.boundary_info->build_side_list (el, sl, il);
 
     for(unsigned int i=0; i<el.size(); i++)
     {
@@ -1626,6 +1655,14 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
         RECORD();
         input_ok = false;
       }
+    }
+
+    if(in.numberofsegments < 3)
+    {
+      MESSAGE << "ERROR: do_refine(): only " << in.numberofsegments
+              << " segment(s); a valid closed PSLG needs at least 3.\n";
+      RECORD();
+      input_ok = false;
     }
 
     if(!input_ok)

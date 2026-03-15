@@ -52,7 +52,14 @@ namespace Material
   static void _read_predefined_material_information(const std::string &fname)
   {
     std::ifstream in(fname.c_str());
-    genius_assert(in.good());
+    if (!in.good())
+    {
+      std::cerr << "ERROR: Cannot open material definitions file: " << fname << "\n"
+                << "       GENIUS_DIR is currently: " << Genius::genius_dir() << "\n"
+                << "       Please verify that GENIUS_DIR is set correctly and that\n"
+                << "       $GENIUS_DIR/lib/material.def exists.\n";
+      std::abort();
+    }
 
     std::string content;
 
