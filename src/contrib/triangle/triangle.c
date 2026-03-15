@@ -7412,7 +7412,9 @@ struct behavior *b;
     for (triangleloop.orient = 0; triangleloop.orient < 3;
          triangleloop.orient++) {
       org(triangleloop, triorg);
-      setvertex2tri(triorg, encode(triangleloop));
+      if (triorg != (vertex) NULL) {
+        setvertex2tri(triorg, encode(triangleloop));
+      }
     }
     triangleloop.tri = triangletraverse(m);
   }

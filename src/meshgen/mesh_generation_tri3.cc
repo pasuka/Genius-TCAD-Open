@@ -1107,6 +1107,9 @@ int MeshGeneratorTri3::triangle_mesh()
           << in.numberofsegments << " segments, "
           << in.numberofregions << " regions\n"; RECORD();
 #ifdef __triangle_h__
+  // Flush stdout so that Triangle's own progress messages are visible even if
+  // the process terminates abnormally (e.g. due to a SIGSEGV inside Triangle).
+  fflush(stdout);
   triangulate(const_cast<char *>(tri_cmd.c_str()), &in, &out, (struct triangulateio *) NULL);
 #else
   ctri_triangulate(const_cast<char *>(tri_cmd.c_str()), &in, &out);
