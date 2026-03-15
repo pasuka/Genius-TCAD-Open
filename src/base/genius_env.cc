@@ -23,6 +23,7 @@
 #include "genius_common.h"
 #include "genius_env.h"
 
+#include <cctype>
 #include <ios>
 #include <fstream>
 #include <string>
@@ -123,6 +124,48 @@ std::pair<size_t, size_t> Genius::memory_size()
 #endif
   //return 0;
 
+}
+
+
+#ifdef WINDOWS
+// Convert a MSYS2/Cygwin POSIX-style path to a native Windows path so that
+// Win32 APIs such as LoadLibraryEx() can resolve it correctly.
+//
+// Examples:
+//   /d/code-repo/Genius-TCAD-Open  →  D:\code-repo\Genius-TCAD-Open
+//   /c/Program Files/genius        →  C:\Program Files\genius
+//
+// Paths that do not match the /<letter>/<rest> pattern are returned unchanged,
+// so a caller that already has a proper Windows path is unaffected.
+static std::string normalize_windows_path(const std::string &path)
+{
+  // MSYS2/Cygwin encodes the Windows drive D: as /d/ at the start of the path.
+  if (path.size() >= 3 &&
+      path[0] == '/' &&
+      std::isalpha(static_cast<unsigned char>(path[1])) &&
+      path[2] == '/')
+  {
+    std::string win_path;
+    win_path.reserve(path.size());
+    win_path += static_cast<char>(std::toupper(static_cast<unsigned char>(path[1])));
+    win_path += ':';
+    win_path += '\\';
+    for (std::size_t i = 3; i < path.size(); ++i)
+      win_path += (path[i] == '/') ? '\\' : path[i];
+    return win_path;
+  }
+  return path;
+}
+#endif // WINDOWS
+
+
+void Genius::set_genius_dir(const std::string &genius_dir)
+{
+#ifdef WINDOWS
+  GeniusPrivateData::_genius_dir = normalize_windows_path(genius_dir);
+#else
+  GeniusPrivateData::_genius_dir = genius_dir;
+#endif
 }
 
 

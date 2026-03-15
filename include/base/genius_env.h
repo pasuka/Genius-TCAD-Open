@@ -253,10 +253,10 @@ inline std::string Genius::genius_dir()
   return GeniusPrivateData::_genius_dir;
 }
 
-inline void Genius::set_genius_dir(const std::string &genius_dir)
-{
-  GeniusPrivateData::_genius_dir = genius_dir;
-}
+// NOTE: set_genius_dir is NOT inline; its implementation lives in genius_env.cc
+// so that it can perform platform-specific path normalization (e.g. converting
+// MSYS2/Cygwin POSIX-style paths such as /d/foo → D:\foo on Windows) without
+// pulling Windows headers into every translation unit that includes this header.
 
 inline void Genius::set_experiment_code(bool f)
 {
