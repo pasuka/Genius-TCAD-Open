@@ -15687,7 +15687,31 @@ char **argv;
 #endif /* not TRILIBRARY */
 
 {
-  struct mesh m;
+  /* `struct mesh' contains three 4096-element pointer/int arrays:
+   *   queuefront[4096]  (pointer) = 32 KB
+   *   queuetail[4096]   (pointer) = 32 KB
+   *   nextnonemptyq[4096] (int)   = 16 KB
+   * plus 8 struct memorypool pools and other scalar fields  ~2 KB
+   *                                               Total:  ~82 KB
+   * Placing this on the call stack inside a deep simulator call chain
+   * causes a stack-overflow SIGSEGV before any Triangle code executes.
+   * Declaring it static moves the storage to the BSS segment.
+   *
+   * This is safe because:
+   *   - triangleinit() reinitialises all pool/counter fields at the start
+   *     of every call (via poolzero()).
+   *   - triangledeinit() frees all heap allocations and zeroes pools at
+   *     the end of every call (via pooldeinit() -> poolzero()).
+   *   - enforcequality() re-initialises queuefront[] and firstnonemptyq
+   *     before quality-meshing begins.
+   *   - triexit() calls exit(), so partial-failure paths never re-enter
+   *     triangulate() with stale state.
+   *
+   * NOTE: This makes triangulate() non-reentrant and non-thread-safe.
+   * The only supported call model is single-threaded MPI ranks, one
+   * call at a time.  Do not call triangulate() concurrently from
+   * multiple threads. */
+  static struct mesh m;
   struct behavior b;
   REAL *holearray;                                        /* Array of holes. */
   REAL *regionarray;   /* Array of regional attributes and area constraints. */
