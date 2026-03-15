@@ -85,7 +85,14 @@ namespace Material
 #endif
 
 #ifdef WINDOWS
-    dll_file = LoadLibrary(filename.c_str());
+    // Use LOAD_WITH_ALTERED_SEARCH_PATH so that Windows searches the directory
+    // containing the material DLL (i.e. $GENIUS_DIR\lib\) for its transitive
+    // dependencies.  Without this flag, only the application directory and the
+    // system PATH are searched, which means dependent DLLs located alongside
+    // the material DLL are not found when the program is launched directly from
+    // an MSYS2 terminal (they *are* found under GDB because GDB's environment
+    // sets up a different search path).
+    dll_file = LoadLibraryEx(filename.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     if(dll_file==NULL)
     {
       MESSAGE<<"Open material file lib"<< _material <<".dll error." << '\n'; RECORD();

@@ -36,11 +36,18 @@ DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
 :Hook(solver, name), dll_handle(0), hook(0)
 {
   std::string genius_dir(Genius::genius_dir());
+#ifdef WINDOWS
+  std::string filename =  genius_dir + "\\lib\\" + name + ".dll";
+#else
   std::string filename =  genius_dir + "/lib/" + name + ".so";
+#endif
 
 #ifdef WINDOWS
-  // Use Windows LoadLibrary to load the hook DLL
-  dll_handle = (void *) LoadLibraryA(filename.c_str());
+  // Use LOAD_WITH_ALTERED_SEARCH_PATH so that Windows searches the directory
+  // containing the hook DLL (i.e. $GENIUS_DIR\lib\) for its transitive
+  // dependencies.  Without this flag, dependent DLLs in $GENIUS_DIR\lib\ are
+  // not found when the program is run directly from an MSYS2 terminal.
+  dll_handle = (void *) LoadLibraryExA(filename.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
   if(!dll_handle)
   {
     DWORD err = GetLastError();
