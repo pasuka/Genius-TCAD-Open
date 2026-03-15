@@ -715,10 +715,20 @@ void  ElectricalSource::SetVSHELL(const Parser::Card &c)
 #ifdef WINDOWS
 
   HINSTANCE hInstLibrary = LoadLibrary(filename.c_str());
-  genius_assert(hInstLibrary);
+  if(!hInstLibrary)
+  {
+    MESSAGE<<"VSHELL: failed to load DLL: " << filename << '\n'; RECORD();
+    MESSAGE<<"Windows error code: " << GetLastError() << '\n'; RECORD();
+    genius_error();
+  }
 
   void *fp = reinterpret_cast<void *>(GetProcAddress(hInstLibrary, funcname.c_str()));
-  genius_assert(fp);
+  if(!fp)
+  {
+    MESSAGE<<"VSHELL: failed to find function '" << funcname << "' in DLL: " << filename << '\n'; RECORD();
+    MESSAGE<<"Windows error code: " << GetLastError() << '\n'; RECORD();
+    genius_error();
+  }
 
   _vsource_list[label] = new VSHELL(label, hInstLibrary, fp, s, V);
 
@@ -729,19 +739,27 @@ void  ElectricalSource::SetVSHELL(const Parser::Card &c)
 #else
   void * dp = dlopen(filename.c_str(), RTLD_LAZY);
 #endif
-  genius_assert(dp);
+  if(!dp)
+  {
+    MESSAGE<<"VSHELL: failed to load shared library: " << filename << '\n'; RECORD();
+    MESSAGE<<"Error: " << dlerror() << '\n'; RECORD();
+    genius_error();
+  }
 
   void *fp = dlsym(dp,funcname.c_str());
-  genius_assert(fp);
+  if(!fp)
+  {
+    MESSAGE<<"VSHELL: failed to find function '" << funcname << "' in shared library: " << filename << '\n'; RECORD();
+    MESSAGE<<"Error: " << dlerror() << '\n'; RECORD();
+    genius_error();
+  }
 
   _vsource_list[label] = new VSHELL(label, dp, fp, s, V);
 
 #endif
 
-/*
-  MESSAGE<<"\nVSHELL : "<<label<<" load from "<<filename<<"\n";
+  MESSAGE<<"\nVSHELL : " << label << " loaded from " << filename << '\n';
   RECORD();
-*/
 
 }
 
@@ -924,10 +942,20 @@ void  ElectricalSource::SetISHELL(const Parser::Card &c)
 #ifdef WINDOWS
 
   HINSTANCE hInstLibrary = LoadLibrary(filename.c_str());
-  genius_assert(hInstLibrary);
+  if(!hInstLibrary)
+  {
+    MESSAGE<<"ISHELL: failed to load DLL: " << filename << '\n'; RECORD();
+    MESSAGE<<"Windows error code: " << GetLastError() << '\n'; RECORD();
+    genius_error();
+  }
 
   void *fp = reinterpret_cast<void *>(GetProcAddress(hInstLibrary, funcname.c_str()));
-  genius_assert(fp);
+  if(!fp)
+  {
+    MESSAGE<<"ISHELL: failed to find function '" << funcname << "' in DLL: " << filename << '\n'; RECORD();
+    MESSAGE<<"Windows error code: " << GetLastError() << '\n'; RECORD();
+    genius_error();
+  }
 
   _isource_list[label] = new ISHELL(label, hInstLibrary, fp, s, A);
 
@@ -937,22 +965,27 @@ void  ElectricalSource::SetISHELL(const Parser::Card &c)
 #else
   void * dp = dlopen(filename.c_str(), RTLD_LAZY);
 #endif
-  genius_assert(dp);
-
+  if(!dp)
+  {
+    MESSAGE<<"ISHELL: failed to load shared library: " << filename << '\n'; RECORD();
+    MESSAGE<<"Error: " << dlerror() << '\n'; RECORD();
+    genius_error();
+  }
 
   void *fp = dlsym(dp,funcname.c_str());
-  genius_assert(fp);
+  if(!fp)
+  {
+    MESSAGE<<"ISHELL: failed to find function '" << funcname << "' in shared library: " << filename << '\n'; RECORD();
+    MESSAGE<<"Error: " << dlerror() << '\n'; RECORD();
+    genius_error();
+  }
 
   _isource_list[label] = new ISHELL(label, dp, fp, s, A);
 
 #endif
 
-
-
-/*
-  MESSAGE<<"\nISHELL : "<<label<<" load from "<<filename<<"\n";
+  MESSAGE<<"\nISHELL : " << label << " loaded from " << filename << '\n';
   RECORD();
-*/
 
 }
 

@@ -70,7 +70,15 @@ SPICE_CKT::SPICE_CKT(const std::string & ckt_file)
 #endif
 
   if(dll_file==NULL)
-  { MESSAGE<<"Load spice engine error." << '\n'; RECORD(); genius_error();}
+  {
+    MESSAGE<<"Load spice engine error: failed to load: " << filename << '\n'; RECORD();
+#ifdef WINDOWS
+    MESSAGE<<"Windows error code: " << GetLastError() << '\n'; RECORD();
+#else
+    MESSAGE<<"Error: " << dlerror() << '\n'; RECORD();
+#endif
+    genius_error();
+  }
 
   //read the spice netlist
   int (*init_netlist) (char * );
