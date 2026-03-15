@@ -90,10 +90,12 @@ bool Genius::clean_processors()
 
 
 #ifdef WINDOWS
+  #include <windows.h>
 #else
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/resource.h>
+  #include <unistd.h>
+  #include <climits>
+  #include <sys/time.h>
+  #include <sys/resource.h>
 #endif
 
 
@@ -123,6 +125,43 @@ std::pair<size_t, size_t> Genius::memory_size()
 
 }
 
+
+std::string Genius::auto_detect_genius_dir()
+{
+  // The expected layout is $GENIUS_DIR/bin/genius (or genius.exe on Windows).
+  // We resolve the path of the running executable, strip the binary name to
+  // get its containing directory, and then strip one more level to obtain the
+  // installation prefix that should serve as GENIUS_DIR.
+
+#ifdef WINDOWS
+  char buf[MAX_PATH];
+  DWORD len = GetModuleFileNameA(NULL, buf, MAX_PATH);
+  if (len == 0 || len >= MAX_PATH) return std::string();
+  std::string exe_path(buf, len);
+  // Strip executable name → bin directory
+  std::string::size_type pos = exe_path.rfind('\\');
+  if (pos == std::string::npos) return std::string();
+  std::string bin_dir = exe_path.substr(0, pos);
+  // Strip bin directory → installation prefix
+  pos = bin_dir.rfind('\\');
+  if (pos == std::string::npos) return std::string();
+  return bin_dir.substr(0, pos);
+#else
+  char buf[PATH_MAX];
+  ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+  if (len <= 0) return std::string();
+  buf[len] = '\0';
+  std::string exe_path(buf);
+  // Strip executable name → bin directory
+  std::string::size_type pos = exe_path.rfind('/');
+  if (pos == std::string::npos) return std::string();
+  std::string bin_dir = exe_path.substr(0, pos);
+  // Strip bin directory → installation prefix
+  pos = bin_dir.rfind('/');
+  if (pos == std::string::npos) return std::string();
+  return bin_dir.substr(0, pos);
+#endif
+}
 
 
 
