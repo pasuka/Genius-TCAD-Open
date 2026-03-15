@@ -23,6 +23,8 @@
 #include <cassert>
 
 #include "waveform.h"
+#include "log.h"
+#include "genius_common.h"
 
 #ifdef WINDOWS
   #include <Windows.h>
@@ -42,22 +44,46 @@ WaveformShell::WaveformShell(const std::string & s, const std::string & dll_file
 #ifdef WINDOWS
 
   dll = LoadLibrary(dll_file.c_str());
+  if(!dll)
+  {
+    MESSAGE<<"WaveformShell: failed to load DLL: " << dll_file << '\n'; RECORD();
+    MESSAGE<<"Windows error code: " << GetLastError() << '\n'; RECORD();
+    genius_error();
+  }
   void *fp = reinterpret_cast<void *>(GetProcAddress(dll, function.c_str()));
+  if(!fp)
+  {
+    MESSAGE<<"WaveformShell: failed to find function '" << function << "' in DLL: " << dll_file << '\n'; RECORD();
+    MESSAGE<<"Windows error code: " << GetLastError() << '\n'; RECORD();
+    genius_error();
+  }
 
 #else
 
 #ifdef RTLD_DEEPBIND
-  dll = dlopen(dll_file.c_str(), RTLD_LAZY|RTLD_DEEPBIND);  assert(dll);
+  dll = dlopen(dll_file.c_str(), RTLD_LAZY|RTLD_DEEPBIND);
 #else
-  dll = dlopen(dll_file.c_str(), RTLD_LAZY);  assert(dll);
+  dll = dlopen(dll_file.c_str(), RTLD_LAZY);
+#endif
+  if(!dll)
+  {
+    MESSAGE<<"WaveformShell: failed to load shared library: " << dll_file << '\n'; RECORD();
+    MESSAGE<<"Error: " << dlerror() << '\n'; RECORD();
+    genius_error();
+  }
+
+  void *fp = dlsym(dll, function.c_str());
+  if(!fp)
+  {
+    MESSAGE<<"WaveformShell: failed to find function '" << function << "' in shared library: " << dll_file << '\n'; RECORD();
+    MESSAGE<<"Error: " << dlerror() << '\n'; RECORD();
+    genius_error();
+  }
+
 #endif
 
-  void *fp = dlsym(dll, function.c_str());  assert(fp);
-
-#endif
-
-  assert(fp);
   Waveform_Shell = (double (*)(double)) fp;
+  MESSAGE<<"WaveformShell: loaded function '" << function << "' from " << dll_file << '\n'; RECORD();
 
   scale_t = s_t;
 }

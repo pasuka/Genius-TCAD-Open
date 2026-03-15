@@ -51,7 +51,7 @@ DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
   if(!dll_handle)
   {
     DWORD err = GetLastError();
-    std::cerr << "Load hook failed: Windows error code " << err << std::endl;
+    std::cerr << "Load hook failed: cannot open '" << filename << "', Windows error code " << err << std::endl;
     return;
   }
 
@@ -60,7 +60,7 @@ DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
   if(!get_hook)
   {
     DWORD err = GetLastError();
-    std::cerr << "Load hook failed: Windows error code " << err << std::endl;
+    std::cerr << "Load hook failed: cannot find 'get_hook' in '" << filename << "', Windows error code " << err << std::endl;
     FreeLibrary((HMODULE)dll_handle);
     dll_handle = NULL;
     return;
@@ -77,7 +77,7 @@ DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
   error = dlerror();
   if(error)
   {
-    std::cerr<< "Load hook faild: "<< error << std::endl;
+    std::cerr<< "Load hook failed: cannot open '" << filename << "': "<< error << std::endl;
     dll_handle = NULL;
     return;
   }
@@ -87,7 +87,7 @@ DllHook::DllHook(SolverBase & solver, const std::string & name, void * fun_data)
   error = dlerror();
   if(error)
   {
-    std::cerr<< "Load hook faild: "<< error << std::endl;
+    std::cerr<< "Load hook failed: cannot find 'get_hook' in '" << filename << "': "<< error << std::endl;
     dll_handle = NULL;
     return;
   }

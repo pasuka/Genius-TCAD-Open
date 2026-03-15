@@ -57,7 +57,7 @@ InjectionHook::InjectionHook(SolverBase & solver, const std::string & name, void
   dll_file = dlopen(injection_current.c_str(), RTLD_LAZY );
   if(dll_file==NULL)
   {
-    MESSAGE<< "Injection Error: Can not open dll file "<<injection_current<< " to load inject current" <<std::endl;RECORD();
+    MESSAGE<< "Injection Error: Can not open dll file '"<<injection_current<<"': "<<dlerror()<< std::endl;RECORD();
     genius_error();
   }
 
