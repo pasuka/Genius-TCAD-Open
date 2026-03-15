@@ -33,14 +33,23 @@ set(_material_subdirs
   W
 )
 
+# material.cc constructs filenames as "lib<MaterialName>.dll" (Windows) or
+# "lib<MaterialName>.so" (Linux/macOS), so the module libraries must carry the
+# "lib" prefix and the platform-appropriate suffix to match at runtime.
+if(WIN32)
+  set(_mat_suffix ".dll")
+else()
+  set(_mat_suffix ".so")
+endif()
+
 foreach(_mat ${_material_subdirs})
   file(GLOB _mat_srcs ${_mat}/*.cc)
   if(_mat_srcs)
     add_library(mat_${_mat} MODULE adolc_init.cc ${_mat_srcs})
     set_target_properties(mat_${_mat} PROPERTIES
       OUTPUT_NAME ${_mat}
-      PREFIX ""
-      SUFFIX ".so"
+      PREFIX "lib"
+      SUFFIX ${_mat_suffix}
     )
     target_include_directories(mat_${_mat} PRIVATE
       ${CMAKE_SOURCE_DIR}/include
@@ -48,7 +57,8 @@ foreach(_mat ${_material_subdirs})
     )
     target_link_libraries(mat_${_mat} PRIVATE material)
     install(TARGETS mat_${_mat}
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/genius
+      LIBRARY DESTINATION lib
+      RUNTIME DESTINATION lib
     )
   endif()
 endforeach()
