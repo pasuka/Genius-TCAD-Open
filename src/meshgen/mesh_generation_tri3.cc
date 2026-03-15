@@ -1085,7 +1085,7 @@ int MeshGeneratorTri3::triangle_mesh()
               << skipped_oob  << " skipped for out-of-bounds coords, "
               << skipped_elim << " skipped for eliminated endpoints)\n";
       RECORD();
-      input_ok = false;
+      input_ok = false;  // triggers the diagnostic dump + return 1 in the if(!input_ok) block below
     }
 
     if(!input_ok)
@@ -1592,7 +1592,9 @@ int MeshGeneratorTri3::do_refine(MeshRefinement & mesh_refinement)
     {
       MESSAGE << "WARNING: do_refine(): boundary_info->n_boundary_conds()=" << n_boundary_conds
               << " but build_side_list() returned " << el.size() << " sides; "
-              << "using " << el.size() << " segments.\n";
+              << "using " << el.size() << " segments.\n"
+              << "  This can occur when boundary data is inconsistent after mesh flattening.\n"
+              << "  The actual sides from build_side_list() will be used.\n";
       RECORD();
     }
     in.numberofsegments = static_cast<int>(el.size());

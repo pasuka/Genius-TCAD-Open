@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <iomanip>
+#include <sstream>
 
 #include "genius_common.h"
 #include "genius_env.h"
@@ -39,6 +40,34 @@
   #include <dlfcn.h>
   #define LDFUN dlsym
 #endif
+
+/// Return a human-readable description of the most recent DLL load or symbol
+/// lookup error.  On Windows this uses FormatMessage() to expand the numeric
+/// error code returned by GetLastError() into an English sentence.  On
+/// POSIX systems it returns the string stored by dlerror().
+static std::string dll_last_error_str()
+{
+#ifdef WINDOWS
+  DWORD err = GetLastError();
+  if (err == 0) return std::string("(no error)");
+  char buf[512] = {0};
+  DWORD n = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                           NULL, err, 0, buf, static_cast<DWORD>(sizeof(buf) - 1), NULL);
+  // Strip trailing whitespace / newline characters added by FormatMessage.
+  while (n > 0 && (buf[n-1] == '\n' || buf[n-1] == '\r' || buf[n-1] == ' '))
+    buf[--n] = '\0';
+  if (n == 0)
+  {
+    std::ostringstream oss;
+    oss << "Windows error code " << err;
+    return oss.str();
+  }
+  return std::string(buf);
+#else
+  const char *err = dlerror();
+  return err ? std::string(err) : std::string("(no error reported by dlerror)");
+#endif
+}
 
 
 #include "material.h"
@@ -97,7 +126,7 @@ namespace Material
     {
       MESSAGE<<"Open material file lib"<< _material <<".dll error." << '\n'; RECORD();
       MESSAGE<<"Tried path: " << filename << '\n'; RECORD();
-      MESSAGE<<"Error code: " << GetLastError() << '\n'; RECORD();
+      MESSAGE<<"Error: " << dll_last_error_str() << '\n'; RECORD();
       MESSAGE<<"Please verify that GENIUS_DIR is set correctly and material libraries are installed in $GENIUS_DIR\\lib\\." << '\n'; RECORD();
       genius_error();
     }
@@ -139,54 +168,54 @@ namespace Material
 
     //init AD indepedent variable set routine
     set_ad_num = (void* (*) (const unsigned int))LDFUN(dll_file,"set_ad_number");
-    if(!set_ad_num) { MESSAGE<<"Open PMIS AD_SET_VARIABLE function error!\n"; RECORD(); genius_error();}
+    if(!set_ad_num) { MESSAGE<<"Open PMIS AD_SET_VARIABLE function error: " << dll_last_error_str() << '\n'; RECORD(); genius_error();}
 
     std::string model_fun_name;
 
     // init basic parameters for the material
     model_fun_name = "PMIS_" + _material + "_BasicParameter_Default";
     wbasic = (PMIS_BasicParameter* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wbasic) { MESSAGE<<"Open PMIS "<< material <<" BasicParameter function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wbasic) { MESSAGE<<"Open PMIS "<< material <<" BasicParameter function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Basic] = model_fun_name;
 
     // init band structure model
     model_fun_name = "PMIS_" + _material + "_BandStructure_Default";
     wband =  (PMIS_BandStructure* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wband) { MESSAGE<<"Open PMIS "<< material <<" BandStructure function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wband) { MESSAGE<<"Open PMIS "<< material <<" BandStructure function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Band] = model_fun_name;
 
 
     // init mobility model
     model_fun_name = "PMIS_" + _material + "_Mob_Default";
     wmob  =  (PMIS_Mobility* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wmob) { MESSAGE<<"Open PMIS "<< material <<" Mobility function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wmob) { MESSAGE<<"Open PMIS "<< material <<" Mobility function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Mobility] = model_fun_name;
 
 
     // init Avalanche generation model
     model_fun_name = "PMIS_" + _material + "_Avalanche_Default";
     wgen  =  (PMIS_Avalanche* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wgen) { MESSAGE<<"Open PMIS "<< material <<" Avalanche function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wgen) { MESSAGE<<"Open PMIS "<< material <<" Avalanche function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Impact] = model_fun_name;
 
 
     // init Thermal model for lattice temperature equation
     model_fun_name = "PMIS_" + _material + "_Thermal_Default";
     wthermal  = (PMIS_Thermal* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wthermal) { MESSAGE<<"Open PMIS "<< material <<" Thermal function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wthermal) { MESSAGE<<"Open PMIS "<< material <<" Thermal function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Thermal] = model_fun_name;
 
 
     // init optical data
     model_fun_name = "PMIS_" + _material + "_Optical_Default";
     woptical  = (PMIS_Optical* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!woptical) { MESSAGE<<"Open PMIS "<< material <<" Optical function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!woptical) { MESSAGE<<"Open PMIS "<< material <<" Optical function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Optical] = model_fun_name;
 
     // init trap data
     model_fun_name = "PMIS_" + _material + "_Trap_Default";
     wtrap = (PMIS_Trap* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wtrap ) { MESSAGE<<"Open PMIS "<< material <<" Trap function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wtrap ) { MESSAGE<<"Open PMIS "<< material <<" Trap function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Trap] = model_fun_name;
 
     basic = wbasic(env);
@@ -316,7 +345,7 @@ namespace Material
         if (active_models[Basic] != model_fun_name)
         {
           wbasic = (PMIS_BasicParameter* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wbasic) { MESSAGE<<"Open PMIS "<< material <<" BasicParameter function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wbasic) { MESSAGE<<"Open PMIS "<< material <<" BasicParameter function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete basic;
           // get a new one and do calibrate
@@ -338,7 +367,7 @@ namespace Material
         if (active_models[Band] != model_fun_name)
         {
           wband = (PMIS_BandStructure* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wband) { MESSAGE<<"Open PMIS "<< material <<" BandStructure function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wband) { MESSAGE<<"Open PMIS "<< material <<" BandStructure function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete band;
           // get a new one and do calibrate
@@ -360,7 +389,7 @@ namespace Material
         if (active_models[Mobility] != model_fun_name)
         {
           wmob = (PMIS_Mobility* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wmob) { MESSAGE<<"Open PMIS "<< material <<" Mobility function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wmob) { MESSAGE<<"Open PMIS "<< material <<" Mobility function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete mob;
           // get a new one and do calibrate
@@ -382,7 +411,7 @@ namespace Material
         if (active_models[Impact] != model_fun_name)
         {
           wgen = (PMIS_Avalanche* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wgen) { MESSAGE<<"Open PMIS "<< material <<" Avalanche function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wgen) { MESSAGE<<"Open PMIS "<< material <<" Avalanche function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete gen;
           // get a new one and do calibrate
@@ -404,7 +433,7 @@ namespace Material
         if (active_models[Thermal] != model_fun_name)
         {
           wthermal = (PMIS_Thermal* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wthermal) { MESSAGE<<"Open PMIS "<< material <<" Thermal function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wthermal) { MESSAGE<<"Open PMIS "<< material <<" Thermal function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete thermal;
           // get a new one and do calibrate
@@ -426,7 +455,7 @@ namespace Material
         if (active_models[Optical] != model_fun_name)
         {
           woptical = (PMIS_Optical* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!woptical) { MESSAGE<<"Open PMIS "<< material <<" Optical function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!woptical) { MESSAGE<<"Open PMIS "<< material <<" Optical function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete optical;
           // get a new one and do calibrate
@@ -448,7 +477,7 @@ namespace Material
         if (active_models[Trap] != model_fun_name)
         {
           wtrap = (PMIS_Trap* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wtrap) { MESSAGE<<"Open PMIS "<< material <<" Trap function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wtrap) { MESSAGE<<"Open PMIS "<< material <<" Trap function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete trap;
           // get a new one and do calibrate
@@ -486,32 +515,32 @@ namespace Material
 
     //init AD indepedent variable set routine
     set_ad_num = (void* (*) (const unsigned int))LDFUN(dll_file,"set_ad_number");
-    if(!set_ad_num) { MESSAGE<<"Open PMII AD_SET_VARIABLE function error!\n"; RECORD(); genius_error();}
+    if(!set_ad_num) { MESSAGE<<"Open PMII AD_SET_VARIABLE function error: " << dll_last_error_str() << '\n'; RECORD(); genius_error();}
 
     std::string model_fun_name;
 
     // init basic parameters for the material
     model_fun_name = "PMII_" + _material + "_BasicParameter_Default";
     wbasic = (PMII_BasicParameter* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wbasic) { MESSAGE<<"Open PMII "<< material <<" BasicParameter function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wbasic) { MESSAGE<<"Open PMII "<< material <<" BasicParameter function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Basic] = model_fun_name;
 
     // init band structure model
     model_fun_name = "PMII_" + _material + "_BandStructure_Default";
     wband =  (PMII_BandStructure* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wband) { MESSAGE<<"Open PMII "<< material <<" BandStructure function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wband) { MESSAGE<<"Open PMII "<< material <<" BandStructure function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Band] = model_fun_name;
 
     // init Thermal model for lattice temperature equation
     model_fun_name = "PMII_" + _material + "_Thermal_Default";
     wthermal  = (PMII_Thermal* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wthermal) { MESSAGE<<"Open PMII "<< material <<" Thermal function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wthermal) { MESSAGE<<"Open PMII "<< material <<" Thermal function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Thermal] = model_fun_name;
 
     // init optical data
     model_fun_name = "PMII_" + _material + "_Optical_Default";
     woptical  = (PMII_Optical* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!woptical) { MESSAGE<<"Open PMII "<< material <<" Optical function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!woptical) { MESSAGE<<"Open PMII "<< material <<" Optical function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Optical] = model_fun_name;
 
     basic = wbasic(env);
@@ -610,7 +639,7 @@ namespace Material
         if (active_models[Basic] != model_fun_name)
         {
           wbasic = (PMII_BasicParameter* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wbasic) { MESSAGE<<"Open PMII "<< material <<" BasicParameter function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wbasic) { MESSAGE<<"Open PMII "<< material <<" BasicParameter function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete basic;
           // get a new one and do calibrate
@@ -632,7 +661,7 @@ namespace Material
         if (active_models[Band] != model_fun_name)
         {
           wband = (PMII_BandStructure* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wband) { MESSAGE<<"Open PMII "<< material <<" BandStructure function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wband) { MESSAGE<<"Open PMII "<< material <<" BandStructure function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete band;
           // get a new one and do calibrate
@@ -654,7 +683,7 @@ namespace Material
         if (active_models[Thermal] != model_fun_name)
         {
           wthermal = (PMII_Thermal* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wthermal) { MESSAGE<<"Open PMII "<< material <<" Thermal function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wthermal) { MESSAGE<<"Open PMII "<< material <<" Thermal function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete thermal;
           // get a new one and do calibrate
@@ -676,7 +705,7 @@ namespace Material
         if (active_models[Optical] != model_fun_name)
         {
           woptical = (PMII_Optical* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!woptical) { MESSAGE<<"Open PMII "<< material <<" Optical function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!woptical) { MESSAGE<<"Open PMII "<< material <<" Optical function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete optical;
           // get a new one and do calibrate
@@ -715,26 +744,26 @@ namespace Material
 
     //init AD indepedent variable set routine
     set_ad_num = (void* (*) (const unsigned int))LDFUN(dll_file,"set_ad_number");
-    if(!set_ad_num) { MESSAGE<<"Open PMIC AD_SET_VARIABLE function error!\n"; RECORD(); genius_error();}
+    if(!set_ad_num) { MESSAGE<<"Open PMIC AD_SET_VARIABLE function error: " << dll_last_error_str() << '\n'; RECORD(); genius_error();}
 
     std::string model_fun_name;
 
     // init basic parameters for the material
     model_fun_name = "PMIC_" + _material + "_BasicParameter_Default";
     wbasic = (PMIC_BasicParameter* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wbasic) { MESSAGE<<"Open PMIC "<< material <<" BasicParameter function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wbasic) { MESSAGE<<"Open PMIC "<< material <<" BasicParameter function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Basic] = model_fun_name;
 
     // init Thermal model for lattice temperature equation
     model_fun_name = "PMIC_" + _material + "_Thermal_Default";
     wthermal  = (PMIC_Thermal* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wthermal) { MESSAGE<<"Open PMIC "<< material <<" Thermal function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wthermal) { MESSAGE<<"Open PMIC "<< material <<" Thermal function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Thermal] = model_fun_name;
 
     // init optical data
     model_fun_name = "PMIC_" + _material + "_Optical_Default";
     woptical  = (PMIC_Optical* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!woptical) { MESSAGE<<"Open PMIC "<< material <<" Optical function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!woptical) { MESSAGE<<"Open PMIC "<< material <<" Optical function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Optical] = model_fun_name;
 
     basic = wbasic(env);
@@ -827,7 +856,7 @@ namespace Material
         if (active_models[Basic] != model_fun_name)
         {
           wbasic = (PMIC_BasicParameter* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wbasic) { MESSAGE<<"Open PMIC "<< material <<" BasicParameter function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wbasic) { MESSAGE<<"Open PMIC "<< material <<" BasicParameter function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete basic;
           // get a new one and do calibrate
@@ -849,7 +878,7 @@ namespace Material
         if (active_models[Thermal] != model_fun_name)
         {
           wthermal = (PMIC_Thermal* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wthermal) { MESSAGE<<"Open PMIC "<< material <<" Thermal function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wthermal) { MESSAGE<<"Open PMIC "<< material <<" Thermal function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete thermal;
           // get a new one and do calibrate
@@ -871,7 +900,7 @@ namespace Material
         if (active_models[Optical] != model_fun_name)
         {
           woptical = (PMIC_Optical* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!woptical) { MESSAGE<<"Open PMIC "<< material <<" Optical function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!woptical) { MESSAGE<<"Open PMIC "<< material <<" Optical function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete optical;
           // get a new one and do calibrate
@@ -912,26 +941,26 @@ namespace Material
 
     //init AD indepedent variable set routine
     set_ad_num = (void* (*) (const unsigned int))LDFUN(dll_file,"set_ad_number");
-    if(!set_ad_num) { MESSAGE<<"Open PMIV AD_SET_VARIABLE function error!\n"; RECORD(); genius_error();}
+    if(!set_ad_num) { MESSAGE<<"Open PMIV AD_SET_VARIABLE function error: " << dll_last_error_str() << '\n'; RECORD(); genius_error();}
 
     std::string model_fun_name;
 
     // init basic parameters for the material
     model_fun_name = "PMIV_" + _material + "_BasicParameter_Default";
     wbasic = (PMIV_BasicParameter* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wbasic) { MESSAGE<<"Open PMIV "<< material <<" BasicParameter function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wbasic) { MESSAGE<<"Open PMIV "<< material <<" BasicParameter function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Basic] = model_fun_name;
 
     // init Thermal model for lattice temperature equation
     model_fun_name = "PMIV_" + _material + "_Thermal_Default";
     wthermal  = (PMIV_Thermal* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wthermal) { MESSAGE<<"Open PMIV "<< material <<" Thermal function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wthermal) { MESSAGE<<"Open PMIV "<< material <<" Thermal function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Thermal] = model_fun_name;
 
     // init optical data
     model_fun_name = "PMIV_" + _material + "_Optical_Default";
     woptical  = (PMIV_Optical* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!woptical) { MESSAGE<<"Open PMIV "<< material <<" Optical function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!woptical) { MESSAGE<<"Open PMIV "<< material <<" Optical function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Optical] = model_fun_name;
 
     basic = wbasic(env);
@@ -1023,7 +1052,7 @@ namespace Material
         if (active_models[Basic] != model_fun_name)
         {
           wbasic = (PMIV_BasicParameter* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wbasic) { MESSAGE<<"Open PMIV "<< material <<" BasicParameter function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wbasic) { MESSAGE<<"Open PMIV "<< material <<" BasicParameter function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete basic;
           // get a new one and do calibrate
@@ -1042,7 +1071,7 @@ namespace Material
         if (active_models[Thermal] != model_fun_name)
         {
           wthermal = (PMIV_Thermal* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wthermal) { MESSAGE<<"Open PMIV "<< material <<" Thermal function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wthermal) { MESSAGE<<"Open PMIV "<< material <<" Thermal function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete thermal;
           // get a new one and do calibrate
@@ -1061,7 +1090,7 @@ namespace Material
         if (active_models[Optical] != model_fun_name)
         {
           woptical = (PMIV_Optical* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!woptical) { MESSAGE<<"Open PMIV "<< material <<" Optical function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!woptical) { MESSAGE<<"Open PMIV "<< material <<" Optical function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete optical;
           // get a new one and do calibrate
@@ -1099,20 +1128,20 @@ namespace Material
 
     //init AD indepedent variable set routine
     set_ad_num = (void* (*) (const unsigned int))LDFUN(dll_file,"set_ad_number");
-    if(!set_ad_num) { MESSAGE<<"Open PMIP AD_SET_VARIABLE function error!\n"; RECORD(); genius_error();}
+    if(!set_ad_num) { MESSAGE<<"Open PMIP AD_SET_VARIABLE function error: " << dll_last_error_str() << '\n'; RECORD(); genius_error();}
 
     std::string model_fun_name;
 
     // init basic parameters for the material
     model_fun_name = "PMIP_" + _material + "_BasicParameter_Default";
     wbasic = (PMIP_BasicParameter* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wbasic) { MESSAGE<<"Open PMIP "<< material <<" BasicParameter function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wbasic) { MESSAGE<<"Open PMIP "<< material <<" BasicParameter function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Basic] = model_fun_name;
 
     // init Thermal model for lattice temperature equation
     model_fun_name = "PMIP_" + _material + "_Thermal_Default";
     wthermal  = (PMIP_Thermal* (*) (const PMI_Environment& env))LDFUN(dll_file, model_fun_name.c_str());
-    if(!wthermal) { MESSAGE<<"Open PMIP "<< material <<" Thermal function "<< "Default" <<" error!\n"; RECORD(); genius_error(); }
+    if(!wthermal) { MESSAGE<<"Open PMIP "<< material <<" Thermal function "<< "Default" <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
     active_models[Thermal] = model_fun_name;
 
     basic = wbasic(env);
@@ -1195,7 +1224,7 @@ namespace Material
         if (active_models[Basic] != model_fun_name)
         {
           wbasic = (PMIP_BasicParameter* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wbasic) { MESSAGE<<"Open PMIP "<< material <<" BasicParameter function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wbasic) { MESSAGE<<"Open PMIP "<< material <<" BasicParameter function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete basic;
           // get a new one and do calibrate
@@ -1214,7 +1243,7 @@ namespace Material
         if (active_models[Thermal] != model_fun_name)
         {
           wthermal = (PMIP_Thermal* (*) (const PMI_Environment& env))LDFUN( dll_file, model_fun_name.c_str() );
-          if(!wthermal) { MESSAGE<<"Open PMIP "<< material <<" Thermal function "<< model_name <<" error!\n"; RECORD(); genius_error(); }
+          if(!wthermal) { MESSAGE<<"Open PMIP "<< material <<" Thermal function "<< model_name <<" error: " << dll_last_error_str() << '\n'; RECORD(); genius_error(); }
           // delete old PMI object
           delete thermal;
           // get a new one and do calibrate
