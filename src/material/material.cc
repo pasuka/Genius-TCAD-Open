@@ -89,7 +89,9 @@ namespace Material
     if(dll_file==NULL)
     {
       MESSAGE<<"Open material file lib"<< _material <<".dll error." << '\n'; RECORD();
+      MESSAGE<<"Tried path: " << filename << '\n'; RECORD();
       MESSAGE<<"Error code: " << GetLastError() << '\n'; RECORD();
+      MESSAGE<<"Please verify that GENIUS_DIR is set correctly and material libraries are installed in $GENIUS_DIR\\lib\\." << '\n'; RECORD();
       genius_error();
     }
 #else
@@ -101,7 +103,10 @@ namespace Material
     if(dll_file==NULL)
     {
       MESSAGE<<"Open material file lib"<< _material <<".so error." << '\n'; RECORD();
+      MESSAGE<<"Tried path: " << filename << '\n'; RECORD();
       MESSAGE<<"Error code: " << dlerror() << '\n'; RECORD();
+      MESSAGE<<"Please verify that GENIUS_DIR (currently: " << Genius::genius_dir() << ") is correct." << '\n'; RECORD();
+      MESSAGE<<"and that material libraries are installed in $GENIUS_DIR/lib/." << '\n'; RECORD();
       genius_error();
     }
 #endif

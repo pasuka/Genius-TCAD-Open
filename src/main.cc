@@ -150,11 +150,30 @@ int main(int argc, char ** args)
   // test if GENIUS_DIR has been set correctly
   if( getenv("GENIUS_DIR") == NULL )
   {
-    PetscPrintf(PETSC_COMM_WORLD,"ERROR: User should set environment variable GENIUS_DIR.\n");
-    Genius::clean_processors();
-    exit(0);
+    // GENIUS_DIR is not set; try to derive it from the executable location.
+    // Expected layout: $GENIUS_DIR/bin/genius  →  parent of bin/ is GENIUS_DIR.
+    std::string auto_dir = Genius::auto_detect_genius_dir();
+    if (!auto_dir.empty())
+    {
+      PetscPrintf(PETSC_COMM_WORLD,
+        "WARNING: Environment variable GENIUS_DIR is not set.\n"
+        "         Auto-detected GENIUS_DIR as: %s\n", auto_dir.c_str());
+      Genius::set_genius_dir(auto_dir);
+    }
+    else
+    {
+      PetscPrintf(PETSC_COMM_WORLD,
+        "ERROR: Environment variable GENIUS_DIR is not set and auto-detection failed.\n"
+        "       Please set GENIUS_DIR to the Genius installation directory, e.g.:\n"
+        "         export GENIUS_DIR=/path/to/genius\n");
+      Genius::clean_processors();
+      exit(0);
+    }
   }
-  Genius::set_genius_dir(getenv("GENIUS_DIR"));
+  else
+  {
+    Genius::set_genius_dir(getenv("GENIUS_DIR"));
+  }
 
   // performace log flag
   PetscBool     log_flg;

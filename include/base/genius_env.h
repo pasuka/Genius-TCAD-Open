@@ -113,6 +113,14 @@ namespace Genius {
   void set_genius_dir(const std::string &genius_dir);
 
   /**
+   * @returns a best-guess genius base directory derived from the executable
+   * path (the parent of the directory containing the binary), or an empty
+   * string when auto-detection fails.  Used as a fallback when the
+   * GENIUS_DIR environment variable is not set.
+   */
+  std::string auto_detect_genius_dir();
+
+  /**
    * set flag to enable experiment code
    */
   void set_experiment_code(bool f);
